@@ -1,0 +1,8 @@
+traits:
+  - ID: 1
+    name: "Fort"
+    description: "Temp description"
+
+  - ID: 2
+    name: "Colosse"
+    description: "Temp description"

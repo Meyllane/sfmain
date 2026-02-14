@@ -1,41 +1,38 @@
 package io.github.meyllane.sfmain;
 
+import io.github.meyllane.sfmain.character.species.Species;
+import io.github.meyllane.sfmain.character.species.SpeciesLoader;
+import io.github.meyllane.sfmain.character.traits.Trait;
+import io.github.meyllane.sfmain.character.traits.TraitLoader;
 import io.github.meyllane.sfmain.database.DatabaseManager;
+import io.github.meyllane.sfmain.database.FlywayMigrator;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.flywaydb.core.Flyway;
 
 import java.io.File;
-import java.util.logging.Level;
+import java.util.HashMap;
 
 public final class SFMain extends JavaPlugin {
-    private static YamlConfiguration databaseConfig;
+    private YamlConfiguration databaseConfig;
+    private YamlConfiguration traitsConfig;
+    private YamlConfiguration speciesConfig;
     public static DatabaseManager dbManager;
+    private final String[] configFilesPath = {"database.yml", "traits.yml", "species.yml"};
+
+    public static HashMap<String, Trait> traitsMap;
+    public static HashMap<String, Species> speciesMap;
 
     @Override
     public void onEnable() {
         this.saveConfigFiles();
         this.loadConfigFiles();
 
-        try {
-            dbManager = new DatabaseManager(databaseConfig);
-        } catch (Exception e) {
-            this.getServer().getPluginManager().disablePlugin(this);
-            throw new RuntimeException(e);
-        }
+        DatabaseManager.init(databaseConfig);
+        FlywayMigrator.migrate();
 
-        if (dbManager.getConn() == null) {
-            this.getLogger().log(Level.SEVERE, "Can't connect to the database. The plugin will be disabled");
-            this.getServer().getPluginManager().disablePlugin(this);
-        }
-
-        this.getLogger().log(Level.INFO, "Successfully connected to the database.");
-
-        //Migration
-
-        this.getLogger().log(Level.INFO, "Starting handling of Flyway's migrations.");
-        this.handleMigration();
-        this.getLogger().log(Level.INFO, "Finished handling the migrations.");
+        //Loading from files
+        TraitLoader.load(traitsConfig);
+        SpeciesLoader.load(speciesConfig);
     }
 
     @Override
@@ -44,22 +41,17 @@ public final class SFMain extends JavaPlugin {
     }
 
     private void saveConfigFiles() {
-        File databaseFile = new File(this.getDataFolder(), "database.yml");
-        if (!databaseFile.exists()) {
-            saveResource("database.yml", false);
+        for (String f : this.configFilesPath) {
+            File file = new File(this.getDataFolder(), f);
+            if (!file.exists()) {
+                saveResource(f, false);
+            }
         }
     }
 
     private void loadConfigFiles() {
         databaseConfig = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "database.yml"));
-    }
-
-    private void handleMigration() {
-        Flyway flyway = Flyway.configure(this.getClassLoader())
-                .dataSource(dbManager.getUrl(), dbManager.getUser(), dbManager.getPassword())
-                .locations("classpath:db/migrations")
-                .load();
-
-        flyway.migrate();
+        traitsConfig = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "traits.yml"));
+        speciesConfig = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "species.yml"));
     }
 }

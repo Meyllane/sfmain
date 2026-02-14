@@ -1,0 +1,9 @@
+species:
+  - ID: 1
+    name: "Humain"
+
+  - ID: 2
+    name: "Elessar"
+
+  - ID: 3
+    name: "Robot"

@@ -1,16 +1,21 @@
 package io.github.meyllane.sfmain.database;
 
+import io.github.meyllane.sfmain.SFMain;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.logging.Level;
+
+import static io.github.meyllane.sfmain.SFMain.dbManager;
 
 public class DatabaseManager {
     private final String url;
     private final String user;
     private final String password;
     private Connection conn;
+    private static final SFMain plugin = SFMain.getPlugin(SFMain.class);
 
     public DatabaseManager(YamlConfiguration databaseConfig) throws Exception {
         String host = databaseConfig.getString("host");
@@ -45,6 +50,22 @@ public class DatabaseManager {
         }
 
         return this.conn;
+    }
+
+    public static void init(YamlConfiguration databaseConfig) {
+        try {
+            dbManager = new DatabaseManager(databaseConfig);
+        } catch (Exception e) {
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
+            throw new RuntimeException(e);
+        }
+
+        if (dbManager.getConn() == null) {
+            plugin.getLogger().log(Level.SEVERE, "Can't connect to the database. The plugin will be disabled");
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
+        }
+
+        plugin.getLogger().log(Level.INFO, "Successfully connected to the database.");
     }
 
     public String getUrl() {
