@@ -11,6 +11,7 @@ import java.util.logging.Level;
 public final class SFMain extends JavaPlugin {
     private static YamlConfiguration databaseConfig;
     public static DatabaseManager dbManager;
+
     @Override
     public void onEnable() {
         this.saveConfigFiles();
@@ -24,11 +25,11 @@ public final class SFMain extends JavaPlugin {
         }
 
         if (dbManager.getConn() == null) {
-            this.getLogger().log(Level.SEVERE, "Can't connect to the io.github.meyllane.sfmain.database. The plugin will be disabled");
+            this.getLogger().log(Level.SEVERE, "Can't connect to the database. The plugin will be disabled");
             this.getServer().getPluginManager().disablePlugin(this);
         }
 
-        this.getLogger().log(Level.INFO, "Successfully connected to the io.github.meyllane.sfmain.database.");
+        this.getLogger().log(Level.INFO, "Successfully connected to the database.");
 
         //Migration
 
