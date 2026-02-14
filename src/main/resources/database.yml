@@ -1,0 +1,5 @@
+host: localhost
+database_name: io.github.meyllane.sfmain.database
+port: 3306
+user: root
+password: password
