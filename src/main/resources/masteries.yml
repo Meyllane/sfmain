@@ -1,0 +1,26 @@
+masteries:
+  - ID: 1
+    name: "Amasseur"
+
+  - ID: 2
+    name: "Recycleur"
+
+  - ID: 3
+    name: "Naturaliste"
+
+mastery_specializations:
+  - ID: 1
+    mastery_ID: 1
+    name: "Scalpeur"
+
+  - ID: 2
+    mastery_ID: 1
+    name: "Cueilleur"
+
+  - ID: 3
+    mastery_ID: 1
+    name: "Chasseur"
+
+  - ID: 4
+    mastery_ID: 2
+    name: "Soudeur"

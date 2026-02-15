@@ -1,38 +1,59 @@
 package io.github.meyllane.sfmain;
 
-import io.github.meyllane.sfmain.character.species.Species;
-import io.github.meyllane.sfmain.character.species.SpeciesLoader;
-import io.github.meyllane.sfmain.character.traits.Trait;
-import io.github.meyllane.sfmain.character.traits.TraitLoader;
+import io.github.meyllane.sfmain.database.HibernateUtil;
+import io.github.meyllane.sfmain.entities.Profile;
+import io.github.meyllane.sfmain.named_elements.MasterySpecializationElement;
+import io.github.meyllane.sfmain.named_elements.SpeciesElement;
+import io.github.meyllane.sfmain.named_elements.MasteryElement;
+import io.github.meyllane.sfmain.loaders.MasteryLoader;
+import io.github.meyllane.sfmain.loaders.SpeciesLoader;
+import io.github.meyllane.sfmain.named_elements.TraitElement;
+import io.github.meyllane.sfmain.loaders.TraitLoader;
 import io.github.meyllane.sfmain.database.DatabaseManager;
 import io.github.meyllane.sfmain.database.FlywayMigrator;
+import io.github.meyllane.sfmain.registries.NamedElementRegistry;
+import jakarta.persistence.EntityManager;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 
 import java.io.File;
-import java.util.HashMap;
 
 public final class SFMain extends JavaPlugin {
     private YamlConfiguration databaseConfig;
     private YamlConfiguration traitsConfig;
     private YamlConfiguration speciesConfig;
-    public static DatabaseManager dbManager;
-    private final String[] configFilesPath = {"database.yml", "traits.yml", "species.yml"};
+    private YamlConfiguration masteriesConfig;
 
-    public static HashMap<String, Trait> traitsMap;
-    public static HashMap<String, Species> speciesMap;
+    public static DatabaseManager dbManager;
+    private final String[] configFilesPath = {"database.yml", "traits.yml", "species.yml", "masteries.yml"};
+
+    public static final NamedElementRegistry<TraitElement> traitsRegistry = new NamedElementRegistry<>();
+    public static final NamedElementRegistry<SpeciesElement> speciesRegistry = new NamedElementRegistry<>();
+    public static final NamedElementRegistry<MasteryElement> masteriesRegistry = new NamedElementRegistry<>();
+    public static final NamedElementRegistry<MasterySpecializationElement> masterySpecializationsRegistry = new NamedElementRegistry<>();
+
+    public static SessionFactory sessionFactory;
 
     @Override
     public void onEnable() {
-        this.saveConfigFiles();
+        this.saveConfigFiles(configFilesPath);
         this.loadConfigFiles();
 
         DatabaseManager.init(databaseConfig);
         FlywayMigrator.migrate();
 
+        sessionFactory = HibernateUtil.buildSessionFactory(
+                dbManager.getUrl(),
+                dbManager.getUser(),
+                dbManager.getPassword()
+        );
+
         //Loading from files
         TraitLoader.load(traitsConfig);
         SpeciesLoader.load(speciesConfig);
+        MasteryLoader.load(masteriesConfig);
     }
 
     @Override
@@ -40,8 +61,8 @@ public final class SFMain extends JavaPlugin {
         // Plugin shutdown logic
     }
 
-    private void saveConfigFiles() {
-        for (String f : this.configFilesPath) {
+    private void saveConfigFiles(String[] configFilesPath) {
+        for (String f : configFilesPath) {
             File file = new File(this.getDataFolder(), f);
             if (!file.exists()) {
                 saveResource(f, false);
@@ -53,5 +74,6 @@ public final class SFMain extends JavaPlugin {
         databaseConfig = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "database.yml"));
         traitsConfig = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "traits.yml"));
         speciesConfig = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "species.yml"));
+        masteriesConfig = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "masteries.yml"));
     }
 }
