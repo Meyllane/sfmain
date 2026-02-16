@@ -14,7 +14,7 @@ public class ProfileTrait {
     @ManyToOne(fetch = FetchType.LAZY)
     private Profile profile;
 
-    @Column(name = "trait_id")
+    @Column(name = "trait_ID")
     @Convert(converter = TraitConverter.class)
     private TraitElement trait;
 
@@ -29,5 +29,29 @@ public class ProfileTrait {
 
     public Long getId() {
         return id;
+    }
+
+    public TraitElement getTrait() {
+        return trait;
+    }
+
+    public void setTrait(TraitElement trait) {
+        this.trait = trait;
+    }
+
+    public String getSpecialization() {
+        return specialization;
+    }
+
+    public void setSpecialization(String specialization) {
+        this.specialization = specialization;
+    }
+
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 }

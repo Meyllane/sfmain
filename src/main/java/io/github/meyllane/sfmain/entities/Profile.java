@@ -4,6 +4,7 @@ import io.github.meyllane.sfmain.database.converters.SpeciesConverter;
 import io.github.meyllane.sfmain.named_elements.SpeciesElement;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Entity
@@ -26,8 +27,11 @@ public class Profile {
     @Convert(converter = SpeciesConverter.class)
     private SpeciesElement speciesElement;
 
-    @OneToMany(mappedBy = ProfileTrait_.PROFILE)
-    Collection<ProfileTrait> profileTraits;
+    @OneToMany(mappedBy = ProfileTrait_.PROFILE, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Collection<ProfileTrait> profileTraits = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User user;
 
     public Profile() {}
 
@@ -69,5 +73,13 @@ public class Profile {
 
     public SpeciesElement getSpeciesElement() {
         return speciesElement;
+    }
+
+    public Collection<ProfileTrait> getProfileTraits() {
+        return profileTraits;
+    }
+
+    public void setProfileTraits(Collection<ProfileTrait> profileTraits) {
+        this.profileTraits = profileTraits;
     }
 }
