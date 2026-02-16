@@ -1,7 +1,12 @@
 package io.github.meyllane.sfmain.database;
 
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
+import io.github.classgraph.ScanResult;
 import io.github.meyllane.sfmain.entities.Profile;
 import io.github.meyllane.sfmain.entities.ProfileTrait;
+import io.github.meyllane.sfmain.entities.User;
+import jakarta.persistence.Entity;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -44,9 +49,20 @@ public class HibernateUtil {
                         .applySettings(settings)
                         .build();
 
-        return new MetadataSources(registry)
-                .addAnnotatedClass(Profile.class)
-                .addAnnotatedClass(ProfileTrait.class)
+        MetadataSources cfg = new MetadataSources(registry);
+
+        try (ScanResult scanResult = new ClassGraph()
+                .enableAllInfo()
+                .acceptPackages("io.github.meyllane.sfmain.entities")
+                .scan()
+        ) {
+            for (ClassInfo info : scanResult.getClassesWithAnnotation(Entity.class)) {
+                Class<?> cl = info.loadClass();
+                cfg.addAnnotatedClass(cl);
+            }
+        }
+
+        return cfg
                 .buildMetadata()
                 .buildSessionFactory();
     }
