@@ -2,6 +2,7 @@ package io.github.meyllane.sfmain;
 
 import io.github.meyllane.sfmain.database.HibernateUtil;
 import io.github.meyllane.sfmain.entities.Profile;
+import io.github.meyllane.sfmain.entities.ProfileTrait;
 import io.github.meyllane.sfmain.named_elements.MasterySpecializationElement;
 import io.github.meyllane.sfmain.named_elements.SpeciesElement;
 import io.github.meyllane.sfmain.named_elements.MasteryElement;
@@ -12,10 +13,8 @@ import io.github.meyllane.sfmain.loaders.TraitLoader;
 import io.github.meyllane.sfmain.database.DatabaseManager;
 import io.github.meyllane.sfmain.database.FlywayMigrator;
 import io.github.meyllane.sfmain.registries.NamedElementRegistry;
-import jakarta.persistence.EntityManager;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import java.io.File;
@@ -41,7 +40,11 @@ public final class SFMain extends JavaPlugin {
         this.saveConfigFiles(configFilesPath);
         this.loadConfigFiles();
 
-        DatabaseManager.init(databaseConfig);
+        try {
+            dbManager = new DatabaseManager(databaseConfig);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         FlywayMigrator.migrate();
 
         sessionFactory = HibernateUtil.buildSessionFactory(
