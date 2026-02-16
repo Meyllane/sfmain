@@ -14,7 +14,7 @@ public class FlywayMigrator {
 
         Flyway flyway = Flyway.configure(plugin.getClass().getClassLoader())
                 .dataSource(dbManager.getUrl(), dbManager.getUser(), dbManager.getPassword())
-                .locations("classpath:db/migrations")
+                .locations("classpath:db/migration")
                 .load();
 
         flyway.migrate();
