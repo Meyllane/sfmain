@@ -1,8 +1,8 @@
 package io.github.meyllane.sfmain;
 
+import io.github.meyllane.sfmain.commands.profile.ProfileCommand;
 import io.github.meyllane.sfmain.database.HibernateUtil;
-import io.github.meyllane.sfmain.entities.Profile;
-import io.github.meyllane.sfmain.entities.ProfileTrait;
+import io.github.meyllane.sfmain.events.PlayerJoinEventListener;
 import io.github.meyllane.sfmain.named_elements.MasterySpecializationElement;
 import io.github.meyllane.sfmain.named_elements.SpeciesElement;
 import io.github.meyllane.sfmain.named_elements.MasteryElement;
@@ -13,6 +13,12 @@ import io.github.meyllane.sfmain.loaders.TraitLoader;
 import io.github.meyllane.sfmain.database.DatabaseManager;
 import io.github.meyllane.sfmain.database.FlywayMigrator;
 import io.github.meyllane.sfmain.registries.NamedElementRegistry;
+import io.github.meyllane.sfmain.registries.ProfileRegistry;
+import io.github.meyllane.sfmain.registries.UserRegistry;
+import io.github.meyllane.sfmain.repositories.ProfileRepository;
+import io.github.meyllane.sfmain.repositories.UserRepository;
+import io.github.meyllane.sfmain.services.ProfileService;
+import io.github.meyllane.sfmain.services.UserService;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.hibernate.SessionFactory;
@@ -32,6 +38,8 @@ public final class SFMain extends JavaPlugin {
     public static final NamedElementRegistry<SpeciesElement> speciesRegistry = new NamedElementRegistry<>();
     public static final NamedElementRegistry<MasteryElement> masteriesRegistry = new NamedElementRegistry<>();
     public static final NamedElementRegistry<MasterySpecializationElement> masterySpecializationsRegistry = new NamedElementRegistry<>();
+
+    public static UserService userService;
 
     public static SessionFactory sessionFactory;
 
@@ -53,10 +61,25 @@ public final class SFMain extends JavaPlugin {
                 dbManager.getPassword()
         );
 
+        UserRepository userRepository = new UserRepository(sessionFactory);
+        UserRegistry userRegistry = new UserRegistry();
+        userService = new UserService(userRepository, userRegistry);
+
+        ProfileRepository profileRepository = new ProfileRepository(sessionFactory, speciesRegistry);
+        ProfileRegistry profileRegistry = new ProfileRegistry();
+        ProfileService profileService = new ProfileService(profileRepository, profileRegistry);
+
         //Loading from files
         TraitLoader.load(traitsConfig);
         SpeciesLoader.load(speciesConfig);
         MasteryLoader.load(masteriesConfig);
+
+        //Register listeners
+
+        this.getServer().getPluginManager().registerEvents(new PlayerJoinEventListener(userService, this), this);
+
+        //Command registration
+        new ProfileCommand(this, profileService, profileRegistry).register();
     }
 
     @Override

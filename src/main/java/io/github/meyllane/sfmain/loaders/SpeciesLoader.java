@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+//TODO: Fail if there is no species set up, as one is the minimum required for the db to have a default value to fall back on
 public class SpeciesLoader {
     private static final SFMain plugin = SFMain.getPlugin(SFMain.class);
 

@@ -1,8 +1,10 @@
-package io.github.meyllane.sfmain.entities;
+package io.github.meyllane.sfmain.database.entities;
 
 import io.github.meyllane.sfmain.database.converters.SpeciesConverter;
 import io.github.meyllane.sfmain.named_elements.SpeciesElement;
 import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.NaturalId;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,6 +16,7 @@ public class Profile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NaturalId
     @Column(name = "name")
     private String name;
 
@@ -30,6 +33,7 @@ public class Profile {
     @OneToMany(mappedBy = ProfileTrait_.PROFILE, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Collection<ProfileTrait> profileTraits = new ArrayList<>();
 
+    @JoinColumn(name = "user_ID")
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 

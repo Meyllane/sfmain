@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/SFMain.iml" filepath="$PROJECT_DIR$/.idea/modules/SFMain.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/SFMain.main.iml" filepath="$PROJECT_DIR$/.idea/modules/SFMain.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SFMain.test.iml" filepath="$PROJECT_DIR$/.idea/modules/SFMain.test.iml" />
     </modules>
   </component>
 </project>

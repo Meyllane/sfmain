@@ -1,6 +1,8 @@
-package io.github.meyllane.sfmain.entities;
+package io.github.meyllane.sfmain.database.entities;
 
+import io.github.meyllane.sfmain.database.converters.UUIDStringConverter;
 import jakarta.persistence.*;
+import org.hibernate.annotations.NaturalId;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,7 +15,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "minecraft_UUID")
+    @NaturalId
+    @Column(name = "minecraft_UUID", unique = true)
+    @Convert(converter = UUIDStringConverter.class)
     private UUID minecraftUUID;
 
     @Column(name = "minecraft_name")
@@ -22,6 +26,7 @@ public class User {
     @OneToMany(mappedBy = Profile_.USER)
     private Collection<Profile> profiles = new ArrayList<>();
 
+    @JoinColumn(name = "active_profile_ID")
     @ManyToOne(fetch = FetchType.LAZY)
     private Profile activeProfile;
 
@@ -53,5 +58,13 @@ public class User {
 
     public void setMinecraftName(String minecraftName) {
         this.minecraftName = minecraftName;
+    }
+
+    public Profile getActiveProfile() {
+        return activeProfile;
+    }
+
+    public void setActiveProfile(Profile activeProfile) {
+        this.activeProfile = activeProfile;
     }
 }

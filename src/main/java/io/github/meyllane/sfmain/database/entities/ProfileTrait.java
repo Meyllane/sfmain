@@ -1,4 +1,4 @@
-package io.github.meyllane.sfmain.entities;
+package io.github.meyllane.sfmain.database.entities;
 
 import io.github.meyllane.sfmain.database.converters.TraitConverter;
 import io.github.meyllane.sfmain.named_elements.TraitElement;

@@ -1,20 +1,20 @@
 CREATE TABLE user (
     ID INT PRIMARY KEY AUTO_INCREMENT,
-    minecraft_UUID VARCHAR(36) NOT NULL,
+    minecraft_UUID VARCHAR(36) UNIQUE NOT NULL,
     minecraft_name VARCHAR(60) NOT NULL
 );
 
 CREATE TABLE profile(
     ID INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50) NOT NULL,
+    name VARCHAR(50) UNIQUE NOT NULL,
     age INT default 0,
     description TEXT,
     species_ID INT default 1,
-    user_ID INT NOT NULL,
+    user_ID INT,
     FOREIGN KEY (user_ID) REFERENCES user(ID)
 );
 
-ALTER TABLE user ADD active_profile_ID INT NOT NULL;
+ALTER TABLE user ADD active_profile_ID INT;
 ALTER TABLE user ADD FOREIGN KEY (active_profile_ID) REFERENCES profile(ID);
 
 CREATE TABLE profile_trait(

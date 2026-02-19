@@ -34,6 +34,9 @@ dependencies {
 
     implementation("io.github.classgraph:classgraph:4.8.184")
 
+    implementation 'net.kyori:adventure-api:4.26.1'
+    implementation 'net.kyori:adventure-text-serializer-plain:4.26.1'
+
     implementation("com.zaxxer:HikariCP:7.0.2")
 
     implementation platform("org.hibernate.orm:hibernate-platform:7.2.4.Final")
@@ -45,6 +48,8 @@ dependencies {
     implementation("org.hibernate.orm:hibernate-scan-jandex")
 
     annotationProcessor("org.hibernate.orm:hibernate-processor:7.2.4.Final")
+
+    compileOnly("dev.jorel:commandapi-bukkit-core:10.1.2")
 }
 
 tasks {
@@ -52,7 +57,7 @@ tasks {
         // Configure the Minecraft version for our task.
         // This is the only required configuration besides applying the plugin.
         // Your plugin's jar (or shadowJar if present) will be used automatically.
-        minecraftVersion("1.20")
+        minecraftVersion("1.20.4")
     }
     shadowJar {
         mergeServiceFiles {

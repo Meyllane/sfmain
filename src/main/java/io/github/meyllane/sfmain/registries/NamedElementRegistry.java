@@ -4,10 +4,11 @@ import io.github.meyllane.sfmain.named_elements.NamedElement;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class NamedElementRegistry<C extends NamedElement>{
-    private final HashMap<String, C> byName = new HashMap<>();
-    private final HashMap<Integer, C> byId = new HashMap<>();
+    private final ConcurrentHashMap<String, C> byName = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, C> byId = new ConcurrentHashMap<>();
 
     public void register(C elem) {
         byName.put(elem.getName(), elem);

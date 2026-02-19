@@ -2,3 +2,4 @@ name: SFMain
 version: '1.0'
 main: io.github.meyllane.sfmain.SFMain
 api-version: '1.20'
+depend: [CommandAPI]
