@@ -1,9 +1,14 @@
 package io.github.meyllane.sfmain.repositories;
 
 import io.github.meyllane.sfmain.database.entities.Profile;
+import io.github.meyllane.sfmain.database.entities.Profile_;
+import io.github.meyllane.sfmain.errors.SFException;
 import io.github.meyllane.sfmain.named_elements.SpeciesElement;
 import io.github.meyllane.sfmain.registries.NamedElementRegistry;
+import jakarta.persistence.EntityGraph;
 import org.hibernate.SessionFactory;
+import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.graph.GraphSemantic;
 
 public class ProfileRepository {
     private final SessionFactory sessionFactory;
@@ -15,7 +20,16 @@ public class ProfileRepository {
     }
 
     public Profile getProfile(String profileName) {
-        return sessionFactory.fromTransaction(session -> session.bySimpleNaturalId(Profile.class).load(profileName));
+        EntityGraph<Profile> graph = sessionFactory.createEntityGraph(Profile.class);
+
+        graph.addSubgraph(Profile_.profileTraits);
+
+        return sessionFactory.fromTransaction(session -> {
+            return session.createSelectionQuery("FROM Profile p WHERE p.name = :name", Profile.class)
+                    .setParameter("name", profileName)
+                    .setEntityGraph(graph, GraphSemantic.FETCH)
+                    .getSingleResult();
+        });
     }
 
     public Profile create(String name) {
@@ -45,5 +59,21 @@ public class ProfileRepository {
             return session.createQuery("SELECT name FROM Profile", String.class)
                     .getResultList().toArray(new String[0]);
         });
+    }
+
+    public void update(Profile profile) {
+        sessionFactory.inTransaction(session -> {
+            session.merge(profile);
+            try {
+                session.flush();
+            } catch (Exception e) {
+                if (e instanceof ConstraintViolationException ex) {
+                    String message = "Le paramètre " + ex.getConstraintName() + " existe déjà avec cette valeur et doit être unique.";
+                    throw new SFException(message, ex);
+                }
+                throw new RuntimeException(e);
+            }
+        });
+
     }
 }

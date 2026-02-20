@@ -24,4 +24,12 @@ public enum ProfileUpdateField {
                 .map(ProfileUpdateField::getShortName)
                 .toList();
     }
+
+    public static ProfileUpdateField fromShortName(String shortName) {
+        for (ProfileUpdateField field : values()) {
+            if (field.shortName.equals(shortName)) return field;
+        }
+
+        throw new IllegalArgumentException("No " + ProfileUpdateField.class.getName() + " with the shortName " + shortName);
+    }
 }

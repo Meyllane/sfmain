@@ -4,6 +4,7 @@ import dev.jorel.commandapi.executors.CommandArguments;
 import io.github.meyllane.sfmain.SFMain;
 import io.github.meyllane.sfmain.commands.profile.update.ProfileUpdateCommand;
 import io.github.meyllane.sfmain.database.entities.Profile;
+import io.github.meyllane.sfmain.errors.SFException;
 import io.github.meyllane.sfmain.named_elements.SpeciesElement;
 import io.github.meyllane.sfmain.registries.NamedElementRegistry;
 
@@ -17,11 +18,11 @@ public class SpeciesProfileUpdater implements ProfileUpdater<SpeciesElement> {
                 ""
         );
 
-        if (speciesName.isEmpty()) throw new RuntimeException("Nom d'espèce incorrecte.");
+        if (speciesName.isEmpty()) throw new SFException("Nom d'espèce incorrecte.");
 
         SpeciesElement species = registry.getByName(speciesName);
 
-        if (species == null) throw new RuntimeException("Nom d'espèce incorrecte");
+        if (species == null) throw new SFException("Nom d'espèce incorrecte.");
 
         return species;
     }

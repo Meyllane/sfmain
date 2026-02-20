@@ -4,6 +4,7 @@ import io.github.meyllane.sfmain.named_elements.NamedElement;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class NamedElementRegistry<C extends NamedElement>{
@@ -23,5 +24,11 @@ public class NamedElementRegistry<C extends NamedElement>{
 
     public Collection<C> values() {
         return byId.values();
+    }
+
+    public List<String> getNames() {
+        return this.values().stream()
+                .map(NamedElement::getName)
+                .toList();
     }
 }

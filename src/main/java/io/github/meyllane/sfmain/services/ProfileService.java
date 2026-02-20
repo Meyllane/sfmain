@@ -33,25 +33,35 @@ public class ProfileService {
         return CompletableFuture.supplyAsync(repository::getProfileNames);
     }
 
-    public CompletableFuture<Profile> getProfile(String profileName) {
-        Profile cached = registry.getProfile(profileName);
-
-        if (cached != null) return CompletableFuture.completedFuture(cached);
-
+    private CompletableFuture<Profile> loadProfile(String profileName) {
         return CompletableFuture.supplyAsync(() -> {
-
             Profile profile;
             try {
                 profile = repository.getProfile(profileName);
             } catch (Exception e) {
                 if (e instanceof HibernateException) {
-                    throw new RuntimeException("Le profil demandé n'existe pas.");
+                    throw new RuntimeException("Le profil demandé n'existe pas.", e);
                 }
                 e.printStackTrace();
-                throw new RuntimeException("Une erreur inattendue est survenue.");
+                throw new RuntimeException("Une erreur inattendue est survenue.", e);
             }
 
             return profile;
         });
+    }
+
+    public CompletableFuture<Profile> getProfile(String profileName) {
+        Profile cached = registry.getProfile(profileName);
+
+        if (cached != null) return CompletableFuture.completedFuture(cached);
+
+        return loadProfile(profileName).thenApply(profile -> {
+            registry.register(profile);
+            return profile;
+        });
+    }
+
+    public void update(Profile profile) {
+        repository.update(profile);
     }
 }
