@@ -19,7 +19,7 @@ public class NamedElement {
 
     @Override
     public boolean equals(Object obj) {
-        return obj.getClass() == this.getClass() && ((NamedElement) obj).id.equals(id);
+        return obj != null && obj.getClass() == this.getClass() && ((NamedElement) obj).id.equals(id);
     }
 
     @Override

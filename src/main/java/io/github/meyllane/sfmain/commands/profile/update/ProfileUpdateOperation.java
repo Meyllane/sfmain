@@ -17,4 +17,8 @@ public enum ProfileUpdateOperation {
 
         throw new RuntimeException("No " + ProfileUpdateOperation.class.getName() + " with the name " + name);
     }
+
+    public String getName() {
+        return name;
+    }
 }

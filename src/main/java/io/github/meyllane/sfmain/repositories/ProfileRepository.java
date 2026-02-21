@@ -11,6 +11,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.graph.GraphSemantic;
 
+import java.util.List;
+
 public class ProfileRepository {
     private final SessionFactory sessionFactory;
     private final NamedElementRegistry<SpeciesElement> speciesRegistry;
@@ -30,6 +32,18 @@ public class ProfileRepository {
                     .setParameter("name", profileName)
                     .setEntityGraph(graph, GraphSemantic.FETCH)
                     .getSingleResult();
+        });
+    }
+
+    public List<Profile> getAllProfiles() {
+        EntityGraph<Profile> graph = sessionFactory.createEntityGraph(Profile.class);
+
+        graph.addElementSubgraph(Profile_.profileTraits);
+
+        return sessionFactory.fromTransaction(session -> {
+            return session.createSelectionQuery("FROM Profile", Profile.class)
+                    .setEntityGraph(graph, GraphSemantic.FETCH)
+                    .getResultList();
         });
     }
 

@@ -19,7 +19,7 @@ ALTER TABLE user ADD FOREIGN KEY (active_profile_ID) REFERENCES profile(ID);
 
 CREATE TABLE profile_trait(
     ID INT PRIMARY KEY AUTO_INCREMENT,
-    profile_ID INT NOT NULL ,
+    profile_ID INT,
     FOREIGN KEY (profile_ID) REFERENCES profile(ID),
     trait_ID INT NOT NULL,
     trait_specialization VARCHAR(50) DEFAULT ''

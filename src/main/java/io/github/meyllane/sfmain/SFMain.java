@@ -2,6 +2,7 @@ package io.github.meyllane.sfmain;
 
 import io.github.meyllane.sfmain.commands.profile.ProfileCommand;
 import io.github.meyllane.sfmain.database.HibernateUtil;
+import io.github.meyllane.sfmain.database.entities.Profile;
 import io.github.meyllane.sfmain.events.PlayerJoinEventListener;
 import io.github.meyllane.sfmain.named_elements.MasterySpecializationElement;
 import io.github.meyllane.sfmain.named_elements.SpeciesElement;
@@ -24,6 +25,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.hibernate.SessionFactory;
 
 import java.io.File;
+import java.util.logging.Level;
 
 public final class SFMain extends JavaPlugin {
     private YamlConfiguration databaseConfig;
@@ -40,7 +42,9 @@ public final class SFMain extends JavaPlugin {
     public static final NamedElementRegistry<MasterySpecializationElement> masterySpecializationsRegistry = new NamedElementRegistry<>();
 
     public static UserService userService;
+
     public static ProfileService profileService;
+    public static ProfileRegistry profileRegistry;
 
     public static SessionFactory sessionFactory;
 
@@ -62,25 +66,28 @@ public final class SFMain extends JavaPlugin {
                 dbManager.getPassword()
         );
 
+        //Loading from files
+        TraitLoader.load(traitsConfig);
+        SpeciesLoader.load(speciesConfig);
+        MasteryLoader.load(masteriesConfig);
+
         UserRepository userRepository = new UserRepository(sessionFactory);
         UserRegistry userRegistry = new UserRegistry();
         userService = new UserService(userRepository, userRegistry);
 
         ProfileRepository profileRepository = new ProfileRepository(sessionFactory, speciesRegistry);
-        ProfileRegistry profileRegistry = new ProfileRegistry();
+        profileRegistry = new ProfileRegistry();
         profileService = new ProfileService(profileRepository, profileRegistry);
+        profileService.loadAllProfiles();
 
-        //Loading from files
-        TraitLoader.load(traitsConfig);
-        SpeciesLoader.load(speciesConfig);
-        MasteryLoader.load(masteriesConfig);
+        this.getLogger().log(Level.INFO, "Loaded " + profileRegistry.values().size() + " Profiles from the database.");
 
         //Register listeners
 
         this.getServer().getPluginManager().registerEvents(new PlayerJoinEventListener(userService, this), this);
 
         //Command registration
-        new ProfileCommand(this, profileService, profileRegistry).register();
+        new ProfileCommand().register();
     }
 
     @Override

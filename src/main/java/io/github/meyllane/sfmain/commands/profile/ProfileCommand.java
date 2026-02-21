@@ -10,8 +10,11 @@ import dev.jorel.commandapi.exceptions.WrapperCommandSyntaxException;
 import dev.jorel.commandapi.executors.CommandArguments;
 import io.github.meyllane.sfmain.SFMain;
 import io.github.meyllane.sfmain.commands.profile.update.ProfileUpdateCommand;
+import io.github.meyllane.sfmain.database.entities.Profile;
+import io.github.meyllane.sfmain.errors.SFException;
 import io.github.meyllane.sfmain.registries.ProfileRegistry;
 import io.github.meyllane.sfmain.services.ProfileService;
+import io.github.meyllane.sfmain.utils.PluginCommandHelper;
 import io.github.meyllane.sfmain.utils.PluginMessageHandler;
 import io.github.meyllane.sfmain.utils.PluginMessageType;
 import net.kyori.adventure.text.Component;
@@ -19,16 +22,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class ProfileCommand {
-    private final SFMain plugin;
-    private final ProfileService profileService;
-    private final ProfileRegistry profileRegistry;
+import java.util.concurrent.CompletionException;
 
-    public ProfileCommand(SFMain plugin, ProfileService profileService, ProfileRegistry profileRegistry) {
-        this.plugin = plugin;
-        this.profileService = profileService;
-        this.profileRegistry = profileRegistry;
-    }
+public class ProfileCommand {
+    private static final SFMain plugin = SFMain.getPlugin(SFMain.class);
+    private static final ProfileService profileService = SFMain.profileService;
 
     //TODO : Don't forget the perms
     public void register() {
@@ -46,27 +44,31 @@ public class ProfileCommand {
                 .register();
     }
 
-    public void createProfile(CommandSender sender, CommandArguments args) {
-        String name = args.getByClass("profileName", String.class);
+    public void createProfile(Player sender, CommandArguments args) {
+        String profileName = args.getByClass("profileName", String.class);
 
-        profileService.create(name)
-                .whenComplete((profile, throwable) ->
-                        Bukkit.getScheduler().runTask(plugin, () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
 
-                            if (!(sender instanceof Player player)) {
-                                return;
-                            }
+            profileService.createAndFlush(profileName)
+                    .thenApply(profile -> {
+                        profileService.register(profile);
+                        return profile;
+                    })
+                    .whenComplete((profile, ex) -> handleCompletion(sender, profile, ex));
+        });
+    }
 
-                            if (throwable != null) {
-                                player.sendMessage(Component.text(throwable.getCause().getMessage()));
-                                return;
-                            }
+    protected static void handleCompletion(Player sender, Profile profile, Throwable ex) {
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (ex != null) {
+                PluginCommandHelper.handleErrors(ex, sender);
+                return;
+            }
 
-                            profileRegistry.register(profile);
-                            player.sendMessage(Component.text(
-                                    "Le profile " + profile.getName() + " a bien été créé!"
-                            ));
-                        })
-                );
+            sender.sendMessage(PluginMessageHandler.buildPluginMessageComponent(
+                    "Création du profile " + profile.getName() + " réussie !",
+                    PluginMessageType.SUCCESS
+            ));
+        });
     }
 }

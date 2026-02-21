@@ -10,23 +10,54 @@ import io.github.meyllane.sfmain.SFMain;
 import io.github.meyllane.sfmain.commands.profile.update.ProfileUpdateCommand;
 import io.github.meyllane.sfmain.commands.profile.update.ProfileUpdateOperation;
 import io.github.meyllane.sfmain.database.entities.Profile;
+import io.github.meyllane.sfmain.database.entities.ProfileTrait;
 import io.github.meyllane.sfmain.errors.SFException;
 import io.github.meyllane.sfmain.named_elements.TraitElement;
 import io.github.meyllane.sfmain.registries.NamedElementRegistry;
+import org.bukkit.command.CommandSender;
+
+import java.util.List;
 
 public class ProfileTraitUpdateCommandHandler extends ProfileUpdateCommandHandler<TraitElement> {
     private final NamedElementRegistry<TraitElement> traitsRegistry = SFMain.traitsRegistry;
 
     @Override
     public LiteralArgument buildBranch() {
-        return (LiteralArgument) new LiteralArgument("profile_traits")
+        return (LiteralArgument) new LiteralArgument("traits")
                 .thenNested(
-                        new MultiLiteralArgument(ProfileUpdateCommand.UPDATE_OPERATION_NODE_NAME, "add", "remove"),
+                        new MultiLiteralArgument(
+                                ProfileUpdateCommand.UPDATE_OPERATION_NODE_NAME,
+                                ProfileUpdateOperation.ADD.getName(),
+                                ProfileUpdateOperation.REMOVE.getName()
+                        ),
                         new StringArgument(ProfileUpdateCommand.UPDATE_VALUE_NODE_NAME).replaceSuggestions(
-                                ArgumentSuggestions.strings(traitsRegistry.getNames().toArray(String[]::new))
+                                processSuggestions()
                         )
                                 .executesPlayer(this::execute)
                 );
+    }
+
+    private ArgumentSuggestions<CommandSender> processSuggestions() {
+        return ArgumentSuggestions.strings(info -> {
+            Profile profile = info.previousArgs().getByClass(ProfileUpdateCommand.PROFILE_NODE_NAME, Profile.class);
+            String operation = info.previousArgs().getByClassOrDefault(ProfileUpdateCommand.UPDATE_OPERATION_NODE_NAME, String.class, "");
+
+            if (profile == null || operation.isEmpty()) return new String[0];
+
+            if (operation.equals(ProfileUpdateOperation.ADD.getName())) { //Show the Traits that the profile does not have
+                List<String> profileTraitsName = profile.getProfileTraitsName();
+
+                return traitsRegistry.getNames().stream()
+                        .filter(name -> !profileTraitsName.contains(name))
+                        .toArray(String[]::new);
+            }
+
+            if (operation.equals(ProfileUpdateOperation.REMOVE.getName())) { //Show the Traits that the profile has
+                return profile.getProfileTraitsName().toArray(new String[0]);
+            }
+
+            return new String[0];
+        });
     }
 
     @Override

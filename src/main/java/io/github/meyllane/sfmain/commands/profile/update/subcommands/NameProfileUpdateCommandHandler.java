@@ -4,11 +4,17 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
+import io.github.meyllane.sfmain.SFMain;
 import io.github.meyllane.sfmain.commands.profile.update.ProfileUpdateCommand;
 import io.github.meyllane.sfmain.commands.profile.update.ProfileUpdateOperation;
 import io.github.meyllane.sfmain.database.entities.Profile;
+import io.github.meyllane.sfmain.registries.ProfileRegistry;
+import io.github.meyllane.sfmain.repositories.ProfileRepository;
+import io.github.meyllane.sfmain.services.ProfileService;
 
 public class NameProfileUpdateCommandHandler extends ProfileUpdateCommandHandler<String> {
+    private static final ProfileService profileService = SFMain.profileService;
+
     @Override
     public LiteralArgument buildBranch() {
         return (LiteralArgument) new LiteralArgument("name")
@@ -28,7 +34,9 @@ public class NameProfileUpdateCommandHandler extends ProfileUpdateCommandHandler
     @Override
     protected void update(Profile profile, String updateValue, ProfileUpdateOperation operation) {
         if (operation == ProfileUpdateOperation.UPDATE) {
+            profileService.delete(profile.getName());
             profile.setName(updateValue);
+            profileService.register(profile);
             return;
         }
 

@@ -36,8 +36,8 @@ public class HibernateUtil {
         settings.put("hibernate.hikari.idleTimeout", "30000");
         settings.put("hibernate.hikari.poolName", "SFMainPool");
 
-        settings.put(AvailableSettings.SHOW_SQL, false);
-        settings.put(AvailableSettings.FORMAT_SQL, false);
+        settings.put(AvailableSettings.SHOW_SQL, true);
+        settings.put(AvailableSettings.FORMAT_SQL, true);
 
         settings.put(AvailableSettings.CURRENT_SESSION_CONTEXT_CLASS, "thread");
 

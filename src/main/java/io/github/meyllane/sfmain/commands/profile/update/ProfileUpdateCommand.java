@@ -8,15 +8,16 @@ import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.exceptions.WrapperCommandSyntaxException;
 import dev.jorel.commandapi.executors.CommandArguments;
 import io.github.meyllane.sfmain.SFMain;
+import io.github.meyllane.sfmain.commands.arguments.ProfileArgument;
 import io.github.meyllane.sfmain.commands.profile.update.subcommands.AgeProfileUpdateCommandHandler;
 import io.github.meyllane.sfmain.commands.profile.update.subcommands.NameProfileUpdateCommandHandler;
 import io.github.meyllane.sfmain.commands.profile.update.subcommands.ProfileTraitUpdateCommandHandler;
 import io.github.meyllane.sfmain.commands.profile.update.subcommands.SpeciesProfileUpdateCommandHandler;
 import io.github.meyllane.sfmain.database.entities.Profile;
-import io.github.meyllane.sfmain.errors.SFException;
 import io.github.meyllane.sfmain.named_elements.SpeciesElement;
 import io.github.meyllane.sfmain.registries.NamedElementRegistry;
 import io.github.meyllane.sfmain.services.ProfileService;
+import io.github.meyllane.sfmain.utils.PluginCommandHelper;
 import io.github.meyllane.sfmain.utils.PluginMessageHandler;
 import io.github.meyllane.sfmain.utils.PluginMessageType;
 import org.bukkit.Bukkit;
@@ -24,11 +25,13 @@ import org.bukkit.entity.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.CompletionException;
+import javax.swing.plaf.synth.SynthTextAreaUI;
+import java.util.concurrent.CompletableFuture;
 
 public class ProfileUpdateCommand {
     public static final String UPDATE_VALUE_NODE_NAME = "updateValue";
     public static final String UPDATE_OPERATION_NODE_NAME = "updateOperation";
+    public static final String PROFILE_NODE_NAME = "profile";
     private static final Logger log = LoggerFactory.getLogger(ProfileUpdateCommand.class);
     private static final SFMain plugin = SFMain.getPlugin(SFMain.class);
     private static final ProfileService profileService = SFMain.profileService;
@@ -39,30 +42,12 @@ public class ProfileUpdateCommand {
         return (LiteralArgument) new LiteralArgument("update")
                 .withPermission("sfmain.profile.update")
                 .then(
-                        new StringArgument("profileName")
-                                .replaceSuggestions(
-                                        ArgumentSuggestions.stringsAsync(info ->
-                                                profileService.getProfileNames()
-                                        )
-                                )
+                        new ProfileArgument(PROFILE_NODE_NAME)
                                 .then(new AgeProfileUpdateCommandHandler().buildBranch())
                                 .then(new NameProfileUpdateCommandHandler().buildBranch())
                                 .then(new ProfileTraitUpdateCommandHandler().buildBranch())
                                 .then(new SpeciesProfileUpdateCommandHandler().buildBranch())
                 );
-    }
-
-    private static String requireArgument(CommandArguments args) throws WrapperCommandSyntaxException {
-        String value = args.getByClassOrDefault("profileName", String.class, "");
-
-        if (value.isEmpty()) {
-            throw CommandAPIBukkit.failWithAdventureComponent(PluginMessageHandler.buildPluginMessageComponent(
-                    "Le profile demandé n'existe pas",
-                    PluginMessageType.ERROR
-            ));
-        }
-
-        return value;
     }
 
     public static <T> void handleUpdate(
@@ -71,48 +56,35 @@ public class ProfileUpdateCommand {
             T updateValue,
             ProfileUpdateOperation operation,
             TriConsumer<Profile, T, ProfileUpdateOperation> updater
-            ) throws WrapperCommandSyntaxException {
-
-        String profileName = requireArgument(
-                args
-        );
-
+    ) throws WrapperCommandSyntaxException {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            profileService.getProfile(profileName).thenApply(profile -> {
-               updater.accept(profile, updateValue, operation);
-               profileService.update(profile);
-               return profile;
-            }).whenComplete((profile, ex) -> handleCompletion(player, profile, ex));
+
+            CompletableFuture.supplyAsync(() -> {
+                        Profile profile = args.getByClass("profile", Profile.class);
+
+                        updater.accept(profile, updateValue, operation);
+
+                        profileService.update(profile);
+
+                        return profile;
+                    })
+                    .whenComplete((profile, ex) -> handleCompletion(player, profile, ex));
         });
     }
 
     protected static void handleCompletion(Player sender, Profile profile, Throwable ex) {
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (ex != null) {
-                handleErrors(ex, sender);
+                PluginCommandHelper.handleErrors(ex, sender);
                 return;
             }
+
+            System.out.println(String.valueOf(profile.getProfileTraits()));
 
             sender.sendMessage(PluginMessageHandler.buildPluginMessageComponent(
                     "Mise à jour de " + profile.getName() + " réussie !",
                     PluginMessageType.SUCCESS
             ));
         });
-    }
-
-    private static void handleErrors(Throwable ex, Player sender) {
-        String message;
-        Throwable root = ex instanceof CompletionException ? ex.getCause() : ex;
-        if (root instanceof SFException sfex) {
-            message = sfex.getMessage();
-        } else {
-            root.printStackTrace();
-            message = "Une erreur inattendue s'est produite.";
-        }
-
-        sender.sendMessage(PluginMessageHandler.buildPluginMessageComponent(
-                message,
-                PluginMessageType.ERROR
-        ));
     }
 }

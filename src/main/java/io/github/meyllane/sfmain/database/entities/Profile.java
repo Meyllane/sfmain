@@ -32,7 +32,7 @@ public class Profile {
     @Convert(converter = SpeciesConverter.class)
     private SpeciesElement speciesElement;
 
-    @OneToMany(mappedBy = ProfileTrait_.PROFILE, cascade = {CascadeType.REMOVE, CascadeType.MERGE}, orphanRemoval = true)
+    @OneToMany(mappedBy = ProfileTrait_.PROFILE, cascade = {CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
     private List<ProfileTrait> profileTraits = new ArrayList<>();
 
     @JoinColumn(name = "user_ID")
@@ -40,6 +40,11 @@ public class Profile {
     private User user;
 
     public Profile() {}
+
+    public Profile(String profileName, SpeciesElement species) {
+        name = profileName;
+        speciesElement = species;
+    }
 
     public void setId(Long id) {
         this.id = id;
@@ -85,6 +90,11 @@ public class Profile {
         return profileTraits;
     }
 
+    public List<String> getProfileTraitsName() {
+        return profileTraits.stream()
+                .map(profileTrait -> profileTrait.getTrait().getName())
+                .toList();
+    }
     public void setProfileTraits(List<ProfileTrait> profileTraits) {
         this.profileTraits = profileTraits;
     }
@@ -111,6 +121,7 @@ public class Profile {
                 .orElseThrow(() -> new SFException("Impossible de retirer un trait que le Profile n'a pas."));
 
         profileTraits.remove(elem);
+        elem.setProfile(null);
     }
 
     @Override

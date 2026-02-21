@@ -28,6 +28,8 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
+    compileOnly ('com.mojang:brigadier:1.0.18')
+
     implementation("org.flywaydb:flyway-core:12.0.1")
     implementation("org.flywaydb:flyway-mysql:12.0.1")
     implementation("com.mysql:mysql-connector-j:9.6.0")
