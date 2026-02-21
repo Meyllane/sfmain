@@ -27,15 +27,8 @@ CREATE TABLE profile_trait(
 
 CREATE TABLE profile_mastery(
     ID INT PRIMARY KEY AUTO_INCREMENT,
-    profile_ID INT NOT NULL ,
+    profile_ID INT UNIQUE,
     FOREIGN KEY (profile_ID) REFERENCES profile(ID),
-    mastery_ID INT NOT NULL,
+    mastery_ID INT,
     level INT default 1
-);
-
-CREATE TABLE profile_mastery_specialization(
-    ID INT PRIMARY KEY AUTO_INCREMENT,
-    profile_mastery_ID INT NOT NULL,
-    FOREIGN KEY (profile_mastery_ID) REFERENCES profile_mastery(ID),
-    mastery_specialization_ID INT NOT NULL
 );

@@ -1,31 +1,27 @@
 package io.github.meyllane.sfmain.commands.profile.update;
 
-import dev.jorel.commandapi.CommandAPIBukkit;
-import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.LiteralArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.exceptions.WrapperCommandSyntaxException;
 import dev.jorel.commandapi.executors.CommandArguments;
 import io.github.meyllane.sfmain.SFMain;
 import io.github.meyllane.sfmain.commands.arguments.ProfileArgument;
-import io.github.meyllane.sfmain.commands.profile.update.subcommands.AgeProfileUpdateCommandHandler;
-import io.github.meyllane.sfmain.commands.profile.update.subcommands.NameProfileUpdateCommandHandler;
-import io.github.meyllane.sfmain.commands.profile.update.subcommands.ProfileTraitUpdateCommandHandler;
-import io.github.meyllane.sfmain.commands.profile.update.subcommands.SpeciesProfileUpdateCommandHandler;
-import io.github.meyllane.sfmain.database.entities.Profile;
-import io.github.meyllane.sfmain.named_elements.SpeciesElement;
-import io.github.meyllane.sfmain.registries.NamedElementRegistry;
-import io.github.meyllane.sfmain.services.ProfileService;
+import io.github.meyllane.sfmain.commands.profile.update.handlers.AgeProfileUpdateCommandHandler;
+import io.github.meyllane.sfmain.commands.profile.update.handlers.NameProfileUpdateCommandHandler;
+import io.github.meyllane.sfmain.commands.profile.update.handlers.ProfileTraitUpdateCommandHandler;
+import io.github.meyllane.sfmain.commands.profile.update.handlers.SpeciesProfileUpdateCommandHandler;
+import io.github.meyllane.sfmain.domain.Profile;
+import io.github.meyllane.sfmain.elements.SpeciesElement;
+import io.github.meyllane.sfmain.application.registries.ElementRegistry;
+import io.github.meyllane.sfmain.application.services.ProfileService;
 import io.github.meyllane.sfmain.utils.PluginCommandHelper;
 import io.github.meyllane.sfmain.utils.PluginMessageHandler;
 import io.github.meyllane.sfmain.utils.PluginMessageType;
+import io.github.meyllane.sfmain.utils.TriConsumer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.plaf.synth.SynthTextAreaUI;
 import java.util.concurrent.CompletableFuture;
 
 public class ProfileUpdateCommand {
@@ -35,7 +31,7 @@ public class ProfileUpdateCommand {
     private static final Logger log = LoggerFactory.getLogger(ProfileUpdateCommand.class);
     private static final SFMain plugin = SFMain.getPlugin(SFMain.class);
     private static final ProfileService profileService = SFMain.profileService;
-    private final NamedElementRegistry<SpeciesElement> speciesRegistry = SFMain.speciesRegistry;
+    private final ElementRegistry<SpeciesElement> speciesRegistry = SFMain.speciesRegistry;
 
     public LiteralArgument build() {
 
@@ -56,7 +52,7 @@ public class ProfileUpdateCommand {
             T updateValue,
             ProfileUpdateOperation operation,
             TriConsumer<Profile, T, ProfileUpdateOperation> updater
-    ) throws WrapperCommandSyntaxException {
+    ) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
 
             CompletableFuture.supplyAsync(() -> {
@@ -78,8 +74,6 @@ public class ProfileUpdateCommand {
                 PluginCommandHelper.handleErrors(ex, sender);
                 return;
             }
-
-            System.out.println(String.valueOf(profile.getProfileTraits()));
 
             sender.sendMessage(PluginMessageHandler.buildPluginMessageComponent(
                     "Mise à jour de " + profile.getName() + " réussie !",

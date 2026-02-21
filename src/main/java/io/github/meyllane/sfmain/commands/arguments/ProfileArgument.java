@@ -4,9 +4,9 @@ import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.CustomArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import io.github.meyllane.sfmain.SFMain;
-import io.github.meyllane.sfmain.database.entities.Profile;
+import io.github.meyllane.sfmain.domain.Profile;
 import io.github.meyllane.sfmain.errors.SFException;
-import io.github.meyllane.sfmain.services.ProfileService;
+import io.github.meyllane.sfmain.application.services.ProfileService;
 import io.github.meyllane.sfmain.utils.PluginMessageHandler;
 import io.github.meyllane.sfmain.utils.PluginMessageType;
 

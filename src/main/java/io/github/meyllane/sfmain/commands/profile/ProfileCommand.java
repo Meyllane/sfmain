@@ -1,28 +1,20 @@
 package io.github.meyllane.sfmain.commands.profile;
 
 
-import dev.jorel.commandapi.AbstractArgumentTree;
-import dev.jorel.commandapi.CommandAPIBukkit;
-import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandTree;
 import dev.jorel.commandapi.arguments.*;
-import dev.jorel.commandapi.exceptions.WrapperCommandSyntaxException;
 import dev.jorel.commandapi.executors.CommandArguments;
 import io.github.meyllane.sfmain.SFMain;
 import io.github.meyllane.sfmain.commands.profile.update.ProfileUpdateCommand;
-import io.github.meyllane.sfmain.database.entities.Profile;
-import io.github.meyllane.sfmain.errors.SFException;
-import io.github.meyllane.sfmain.registries.ProfileRegistry;
-import io.github.meyllane.sfmain.services.ProfileService;
+import io.github.meyllane.sfmain.domain.Profile;
+import io.github.meyllane.sfmain.application.services.ProfileService;
 import io.github.meyllane.sfmain.utils.PluginCommandHelper;
 import io.github.meyllane.sfmain.utils.PluginMessageHandler;
 import io.github.meyllane.sfmain.utils.PluginMessageType;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletableFuture;
 
 public class ProfileCommand {
     private static final SFMain plugin = SFMain.getPlugin(SFMain.class);
@@ -48,24 +40,23 @@ public class ProfileCommand {
         String profileName = args.getByClass("profileName", String.class);
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-
-            profileService.createAndFlush(profileName)
-                    .thenApply(profile -> {
+            CompletableFuture.supplyAsync(() -> {
+                        Profile profile = profileService.create(profileName);
                         profileService.register(profile);
                         return profile;
                     })
-                    .whenComplete((profile, ex) -> handleCompletion(sender, profile, ex));
+                    .whenComplete((profile, ex) -> handleCompletion(profile, ex, sender));
         });
     }
 
-    protected static void handleCompletion(Player sender, Profile profile, Throwable ex) {
+    protected static void handleCompletion(Profile profile, Throwable ex, Player player) {
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (ex != null) {
-                PluginCommandHelper.handleErrors(ex, sender);
+                PluginCommandHelper.handleErrors(ex, player);
                 return;
             }
 
-            sender.sendMessage(PluginMessageHandler.buildPluginMessageComponent(
+            player.sendMessage(PluginMessageHandler.buildPluginMessageComponent(
                     "Création du profile " + profile.getName() + " réussie !",
                     PluginMessageType.SUCCESS
             ));

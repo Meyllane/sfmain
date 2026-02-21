@@ -1,25 +1,24 @@
 package io.github.meyllane.sfmain;
 
 import io.github.meyllane.sfmain.commands.profile.ProfileCommand;
-import io.github.meyllane.sfmain.database.HibernateUtil;
-import io.github.meyllane.sfmain.database.entities.Profile;
+import io.github.meyllane.sfmain.persistence.database.HibernateUtil;
 import io.github.meyllane.sfmain.events.PlayerJoinEventListener;
-import io.github.meyllane.sfmain.named_elements.MasterySpecializationElement;
-import io.github.meyllane.sfmain.named_elements.SpeciesElement;
-import io.github.meyllane.sfmain.named_elements.MasteryElement;
-import io.github.meyllane.sfmain.loaders.MasteryLoader;
-import io.github.meyllane.sfmain.loaders.SpeciesLoader;
-import io.github.meyllane.sfmain.named_elements.TraitElement;
-import io.github.meyllane.sfmain.loaders.TraitLoader;
-import io.github.meyllane.sfmain.database.DatabaseManager;
-import io.github.meyllane.sfmain.database.FlywayMigrator;
-import io.github.meyllane.sfmain.registries.NamedElementRegistry;
-import io.github.meyllane.sfmain.registries.ProfileRegistry;
-import io.github.meyllane.sfmain.registries.UserRegistry;
-import io.github.meyllane.sfmain.repositories.ProfileRepository;
-import io.github.meyllane.sfmain.repositories.UserRepository;
-import io.github.meyllane.sfmain.services.ProfileService;
-import io.github.meyllane.sfmain.services.UserService;
+import io.github.meyllane.sfmain.elements.MasterySpecializationElement;
+import io.github.meyllane.sfmain.elements.SpeciesElement;
+import io.github.meyllane.sfmain.elements.MasteryElement;
+import io.github.meyllane.sfmain.application.loaders.MasteryLoader;
+import io.github.meyllane.sfmain.application.loaders.SpeciesLoader;
+import io.github.meyllane.sfmain.elements.TraitElement;
+import io.github.meyllane.sfmain.application.loaders.TraitLoader;
+import io.github.meyllane.sfmain.application.loaders.DatabaseLoader;
+import io.github.meyllane.sfmain.persistence.database.FlywayMigrator;
+import io.github.meyllane.sfmain.application.registries.ElementRegistry;
+import io.github.meyllane.sfmain.application.registries.ProfileRegistry;
+import io.github.meyllane.sfmain.application.registries.UserRegistry;
+import io.github.meyllane.sfmain.persistence.database.repositories.ProfileRepository;
+import io.github.meyllane.sfmain.persistence.database.repositories.UserRepository;
+import io.github.meyllane.sfmain.application.services.ProfileService;
+import io.github.meyllane.sfmain.application.services.UserService;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.hibernate.SessionFactory;
@@ -33,13 +32,13 @@ public final class SFMain extends JavaPlugin {
     private YamlConfiguration speciesConfig;
     private YamlConfiguration masteriesConfig;
 
-    public static DatabaseManager dbManager;
+    public static DatabaseLoader dbManager;
     private final String[] configFilesPath = {"database.yml", "traits.yml", "species.yml", "masteries.yml"};
 
-    public static final NamedElementRegistry<TraitElement> traitsRegistry = new NamedElementRegistry<>();
-    public static final NamedElementRegistry<SpeciesElement> speciesRegistry = new NamedElementRegistry<>();
-    public static final NamedElementRegistry<MasteryElement> masteriesRegistry = new NamedElementRegistry<>();
-    public static final NamedElementRegistry<MasterySpecializationElement> masterySpecializationsRegistry = new NamedElementRegistry<>();
+    public static final ElementRegistry<TraitElement> traitsRegistry = new ElementRegistry<>();
+    public static final ElementRegistry<SpeciesElement> speciesRegistry = new ElementRegistry<>();
+    public static final ElementRegistry<MasteryElement> masteriesRegistry = new ElementRegistry<>();
+    public static final ElementRegistry<MasterySpecializationElement> masterySpecializationsRegistry = new ElementRegistry<>();
 
     public static UserService userService;
 
@@ -54,7 +53,7 @@ public final class SFMain extends JavaPlugin {
         this.loadConfigFiles();
 
         try {
-            dbManager = new DatabaseManager(databaseConfig);
+            dbManager = new DatabaseLoader(databaseConfig);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -74,8 +73,9 @@ public final class SFMain extends JavaPlugin {
         UserRepository userRepository = new UserRepository(sessionFactory);
         UserRegistry userRegistry = new UserRegistry();
         userService = new UserService(userRepository, userRegistry);
+        userService.loadAllUsers();
 
-        ProfileRepository profileRepository = new ProfileRepository(sessionFactory, speciesRegistry);
+        ProfileRepository profileRepository = new ProfileRepository(sessionFactory);
         profileRegistry = new ProfileRegistry();
         profileService = new ProfileService(profileRepository, profileRegistry);
         profileService.loadAllProfiles();

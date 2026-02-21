@@ -1,5 +1,5 @@
 host: localhost
-database_name: io.github.meyllane.sfmain.database
+database_name: io.github.meyllane.sfmain.persistence.database
 port: 3306
 user: root
 password: password
