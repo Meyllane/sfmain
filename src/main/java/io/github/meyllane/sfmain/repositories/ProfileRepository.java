@@ -1,6 +1,7 @@
 package io.github.meyllane.sfmain.repositories;
 
 import io.github.meyllane.sfmain.database.entities.Profile;
+import io.github.meyllane.sfmain.database.entities.ProfileTrait;
 import io.github.meyllane.sfmain.database.entities.Profile_;
 import io.github.meyllane.sfmain.errors.SFException;
 import io.github.meyllane.sfmain.named_elements.SpeciesElement;
@@ -22,7 +23,7 @@ public class ProfileRepository {
     public Profile getProfile(String profileName) {
         EntityGraph<Profile> graph = sessionFactory.createEntityGraph(Profile.class);
 
-        graph.addSubgraph(Profile_.profileTraits);
+        graph.addElementSubgraph(Profile_.profileTraits);
 
         return sessionFactory.fromTransaction(session -> {
             return session.createSelectionQuery("FROM Profile p WHERE p.name = :name", Profile.class)

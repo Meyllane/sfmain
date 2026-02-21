@@ -16,4 +16,14 @@ public class NamedElement {
     public String getName() {
         return name;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj.getClass() == this.getClass() && ((NamedElement) obj).id.equals(id);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.hashCode();
+    }
 }

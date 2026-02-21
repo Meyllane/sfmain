@@ -40,6 +40,7 @@ public final class SFMain extends JavaPlugin {
     public static final NamedElementRegistry<MasterySpecializationElement> masterySpecializationsRegistry = new NamedElementRegistry<>();
 
     public static UserService userService;
+    public static ProfileService profileService;
 
     public static SessionFactory sessionFactory;
 
@@ -67,7 +68,7 @@ public final class SFMain extends JavaPlugin {
 
         ProfileRepository profileRepository = new ProfileRepository(sessionFactory, speciesRegistry);
         ProfileRegistry profileRegistry = new ProfileRegistry();
-        ProfileService profileService = new ProfileService(profileRepository, profileRegistry);
+        profileService = new ProfileService(profileRepository, profileRegistry);
 
         //Loading from files
         TraitLoader.load(traitsConfig);

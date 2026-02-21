@@ -1,11 +1,11 @@
 package io.github.meyllane.sfmain.commands.profile;
 
 
+import dev.jorel.commandapi.AbstractArgumentTree;
 import dev.jorel.commandapi.CommandAPIBukkit;
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
-import dev.jorel.commandapi.arguments.GreedyStringArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
+import dev.jorel.commandapi.CommandTree;
+import dev.jorel.commandapi.arguments.*;
 import dev.jorel.commandapi.exceptions.WrapperCommandSyntaxException;
 import dev.jorel.commandapi.executors.CommandArguments;
 import io.github.meyllane.sfmain.SFMain;
@@ -32,14 +32,17 @@ public class ProfileCommand {
 
     //TODO : Don't forget the perms
     public void register() {
-        CommandAPICommand createProfile = new CommandAPICommand("create")
-                .withPermission("sfmain.profile.create")
-                .withArguments(new GreedyStringArgument("profileName"))
-                .executes(this::createProfile);
 
-        new CommandAPICommand("profile")
-                .withSubcommand(createProfile)
-                .withSubcommand(new ProfileUpdateCommand(plugin, profileService, profileRegistry).build())
+        LiteralArgument createProfile = (LiteralArgument) new LiteralArgument("create")
+                .withPermission("sfmain.profile.create")
+                .then(
+                        new GreedyStringArgument("profileName")
+                                .executesPlayer(this::createProfile)
+                );
+
+        new CommandTree("profile")
+                .then(createProfile)
+                .then(new ProfileUpdateCommand().build())
                 .register();
     }
 

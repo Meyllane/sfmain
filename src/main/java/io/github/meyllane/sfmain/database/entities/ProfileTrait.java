@@ -4,6 +4,8 @@ import io.github.meyllane.sfmain.database.converters.TraitConverter;
 import io.github.meyllane.sfmain.named_elements.TraitElement;
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "profile_trait")
 public class ProfileTrait {
@@ -11,6 +13,7 @@ public class ProfileTrait {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JoinColumn(name = "profile_ID")
     @ManyToOne(fetch = FetchType.LAZY)
     private Profile profile;
 
@@ -53,5 +56,15 @@ public class ProfileTrait {
 
     public void setProfile(Profile profile) {
         this.profile = profile;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj.getClass() == this.getClass() && ((ProfileTrait) obj).trait.equals(trait);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, trait);
     }
 }
