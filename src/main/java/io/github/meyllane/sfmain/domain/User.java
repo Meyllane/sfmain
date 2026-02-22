@@ -2,6 +2,7 @@ package io.github.meyllane.sfmain.domain;
 
 import io.github.meyllane.sfmain.SFMain;
 import io.github.meyllane.sfmain.application.services.ProfileService;
+import io.github.meyllane.sfmain.errors.SFException;
 import io.github.meyllane.sfmain.persistence.database.entities.ProfileEntity;
 import io.github.meyllane.sfmain.persistence.database.entities.UserEntity;
 
@@ -12,8 +13,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class User {
-    private static final ProfileService profileService = SFMain.profileService;
-
     private Long id;
     private UUID minecraftUUID;
     private String minecraftName;
@@ -48,13 +47,36 @@ public class User {
 
     public void setActiveProfile(Profile activeProfile) {
         this.activeProfile = activeProfile;
+        activeProfile.setUser(this);
     }
 
     public void setProfiles(Set<Profile> profiles) {
         this.profiles = profiles;
     }
 
+    public void setMinecraftName(String minecraftName) {
+        this.minecraftName = minecraftName;
+    }
+
+    public void addProfile(Profile profile) {
+        if (!this.profiles.add(profile)) {
+            throw new SFException("Cet utilisateur possède déjà ce profile.");
+        }
+
+        profile.setUser(this);
+    }
+
+    public void removeProfile(Profile profile) {
+        if (!this.profiles.remove(profile)) {
+            throw new SFException("Cet utilisateur ne possède pas déjà ce profile.");
+        }
+
+        profile.setUser(null);
+    }
+
     public static User fromEntity(UserEntity entity) {
+        ProfileService profileService = SFMain.profileService;
+
         User user = new User(
                 entity.getId(),
                 entity.getMinecraftUUID(),

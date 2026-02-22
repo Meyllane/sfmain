@@ -39,6 +39,9 @@ public class PlayerJoinEventListener implements Listener {
                         if (user == null) {
                             user = userService.create(player.getUniqueId(), player.getName());
                             userService.register(user);
+                        } else {
+                            user.setMinecraftName(player.getName());
+                            userService.update(user);
                         }
 
                         return user;
@@ -54,6 +57,13 @@ public class PlayerJoinEventListener implements Listener {
 
         player.sendMessage(PluginMessageHandler.buildPluginMessageComponent(
                 "Bienvenue sur Sans-Frontière, " + user.getMinecraftName() + " !",
+                PluginMessageType.INFO
+        ));
+        String activeProfileName = user.getActiveProfile() != null ?
+                user.getActiveProfile().getName() :
+                "Aucun";
+        player.sendMessage(PluginMessageHandler.buildPluginMessageComponent(
+                "Profile actif : " + activeProfileName,
                 PluginMessageType.INFO
         ));
     }

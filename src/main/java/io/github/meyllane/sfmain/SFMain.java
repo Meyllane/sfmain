@@ -1,5 +1,6 @@
 package io.github.meyllane.sfmain;
 
+import io.github.meyllane.sfmain.commands.UserCommand;
 import io.github.meyllane.sfmain.commands.profile.ProfileCommand;
 import io.github.meyllane.sfmain.elements.MasterySpeElement;
 import io.github.meyllane.sfmain.persistence.database.HibernateUtil;
@@ -88,6 +89,7 @@ public final class SFMain extends JavaPlugin {
 
         //Command registration
         new ProfileCommand().register();
+        UserCommand.register();
     }
 
     @Override

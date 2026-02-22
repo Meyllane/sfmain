@@ -96,6 +96,10 @@ public class ProfileEntity {
         this.speciesElement = speciesElement;
     }
 
+    public void setUser(UserEntity user) {
+        this.user = user;
+    }
+
     public Set<ProfileTraitEntity> getProfileTraitEntities() {
         return profileTraitEntities;
     }

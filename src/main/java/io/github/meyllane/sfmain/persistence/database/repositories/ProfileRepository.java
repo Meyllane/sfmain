@@ -15,6 +15,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.graph.GraphSemantic;
 
 import java.util.List;
+import java.util.Map;
 
 public class ProfileRepository {
     private final SessionFactory sessionFactory;
@@ -40,9 +41,19 @@ public class ProfileRepository {
 
     public void update(Profile domain) {
         sessionFactory.inTransaction(session -> {
-            ProfileEntity entity = session.find(ProfileEntity.class, domain.getId());
+            EntityGraph<ProfileEntity> graph = session.createEntityGraph(ProfileEntity.class);
+            graph.addElementSubgraph(ProfileEntity_.profileTraitEntities);
+            graph.addSubgraph(ProfileEntity_.profileMastery)
+                    .addElementSubgraph(ProfileMasteryEntity_.profileMasterySpeEntities);
+
+            ProfileEntity entity = session.find(
+                    ProfileEntity.class,
+                    domain.getId(),
+                    Map.of(GraphSemantic.FETCH.getJakartaHintName(), graph)
+            );
+
             entity.syncFromDomain(domain);
-            session.persist(entity);
+
             try {
                 session.flush();
             } catch (Exception e) {
@@ -53,7 +64,6 @@ public class ProfileRepository {
                 throw new RuntimeException(e);
             }
         });
-
     }
 
     public Profile create(Profile domain) {

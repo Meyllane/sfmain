@@ -1,5 +1,6 @@
 package io.github.meyllane.sfmain.persistence.database.entities;
 
+import io.github.meyllane.sfmain.domain.User;
 import io.github.meyllane.sfmain.persistence.database.converters.UUIDStringConverter;
 import jakarta.persistence.*;
 import org.hibernate.annotations.NaturalId;
@@ -21,7 +22,7 @@ public class UserEntity {
     @Column(name = "minecraft_name")
     private String minecraftName;
 
-    @OneToMany(mappedBy = ProfileEntity_.USER)
+    @OneToMany(mappedBy = ProfileEntity_.USER, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private Set<ProfileEntity> profiles = new HashSet<>();
 
     @JoinColumn(name = "active_profile_ID")
@@ -69,5 +70,20 @@ public class UserEntity {
 
     public Collection<ProfileEntity> getProfiles() {
         return profiles;
+    }
+
+    public void addProfile(ProfileEntity profile) {
+        profiles.add(profile);
+        profile.setUser(this);
+    }
+
+    public void removeProfile(ProfileEntity profile) {
+        profiles.remove(profile);
+        profile.setUser(null);
+    }
+
+    public void syncFromDomain(User domain) {
+        this.minecraftUUID = domain.getMinecraftUUID();
+        this.minecraftName = domain.getMinecraftName();
     }
 }

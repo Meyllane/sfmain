@@ -8,6 +8,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.entity.Player;
 
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -32,7 +33,17 @@ public class UserService {
         return registry.getUser(minecraftUUID);
     }
 
+    public User getUser(String minecraftName) { return registry.getUser(minecraftName); }
+
     public User create(UUID minecraftUUID, String minecraftName) {
         return repository.createUser(minecraftUUID, minecraftName);
     }
-}
+
+    public Set<String> getUserMinecraftNames() {
+        return this.registry.getUserMinecraftNames();
+    }
+
+    public void update(User user) {
+        repository.update(user);
+    }
+ }
