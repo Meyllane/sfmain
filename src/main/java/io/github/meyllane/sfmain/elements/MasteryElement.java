@@ -1,19 +1,20 @@
 package io.github.meyllane.sfmain.elements;
 
 import java.util.List;
+import java.util.Set;
 
 public class MasteryElement extends Element {
-    private List<MasterySpecializationElement> specializations;
+    private Set<MasterySpeElement> specializations;
 
     public MasteryElement(Integer id, String name) {
         super(id, name);
     }
 
-    public List<MasterySpecializationElement> getSpecializations() {
+    public Set<MasterySpeElement> getSpecializations() {
         return specializations;
     }
 
-    public void setSpecializations(List<MasterySpecializationElement> specializations) {
+    public void setSpecializations(Set<MasterySpeElement> specializations) {
         this.specializations = specializations;
     }
 }

@@ -1,5 +1,7 @@
 package io.github.meyllane.sfmain.domain;
 
+import io.github.meyllane.sfmain.SFMain;
+import io.github.meyllane.sfmain.application.services.ProfileService;
 import io.github.meyllane.sfmain.persistence.database.entities.ProfileEntity;
 import io.github.meyllane.sfmain.persistence.database.entities.UserEntity;
 
@@ -10,11 +12,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class User {
+    private static final ProfileService profileService = SFMain.profileService;
+
     private Long id;
     private UUID minecraftUUID;
     private String minecraftName;
     private Profile activeProfile;
-    private Set<Profile> profiles;
+    private Set<Profile> profiles = new HashSet<>();
 
     public User(Long id, UUID minecraftUUID, String minecraftName) {
         this.id = id;
@@ -59,21 +63,17 @@ public class User {
 
         // Active profile
         if (entity.getActiveProfile() != null) {
-            Profile activeProfile = Profile.fromEntity(entity.getActiveProfile());
+            Profile activeProfile = profileService.getProfile(entity.getActiveProfile().getName());
             activeProfile.setUser(user);
             user.setActiveProfile(activeProfile);
         }
 
-        // Profiles collection
-        Set<Profile> profiles = entity.getProfiles() == null
-                ? new HashSet<>()
-                : entity.getProfiles().stream()
-                .map(Profile::fromEntity)
-                .collect(Collectors.toSet());
-
-        profiles.forEach(profile -> profile.setUser(user));
-
-        user.setProfiles(profiles);
+        //Owned profiles
+        for (ProfileEntity profileEntity : entity.getProfiles()) {
+            Profile profile = profileService.getProfile(profileEntity.getName());
+            profile.setUser(user);
+            user.profiles.add(profile);
+        }
 
         return user;
     }

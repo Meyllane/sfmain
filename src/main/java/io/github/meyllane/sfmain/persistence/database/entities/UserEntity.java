@@ -4,9 +4,7 @@ import io.github.meyllane.sfmain.persistence.database.converters.UUIDStringConve
 import jakarta.persistence.*;
 import org.hibernate.annotations.NaturalId;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "user")
@@ -24,7 +22,7 @@ public class UserEntity {
     private String minecraftName;
 
     @OneToMany(mappedBy = ProfileEntity_.USER)
-    private Collection<ProfileEntity> profiles = new ArrayList<>();
+    private Set<ProfileEntity> profiles = new HashSet<>();
 
     @JoinColumn(name = "active_profile_ID")
     @ManyToOne(fetch = FetchType.LAZY)

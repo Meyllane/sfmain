@@ -1,17 +1,17 @@
 package io.github.meyllane.sfmain.commands.profile.update.handlers;
 
+import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
 import io.github.meyllane.sfmain.commands.profile.update.ProfileUpdateCommand;
 import io.github.meyllane.sfmain.commands.profile.update.ProfileUpdateOperation;
 import io.github.meyllane.sfmain.domain.Profile;
-import io.github.meyllane.sfmain.persistence.database.entities.ProfileEntity;
 
 public class AgeProfileUpdateCommandHandler extends ProfileUpdateCommandHandler<Integer> {
     @Override
-    public LiteralArgument buildBranch() {
-        return (LiteralArgument) new LiteralArgument("age")
+    public Argument<String> buildBranch() {
+        return new LiteralArgument("age")
                 .then(
                         new IntegerArgument(ProfileUpdateCommand.UPDATE_VALUE_NODE_NAME)
                                 .executesPlayer(this::execute)

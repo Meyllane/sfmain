@@ -1,9 +1,9 @@
 package io.github.meyllane.sfmain;
 
 import io.github.meyllane.sfmain.commands.profile.ProfileCommand;
+import io.github.meyllane.sfmain.elements.MasterySpeElement;
 import io.github.meyllane.sfmain.persistence.database.HibernateUtil;
 import io.github.meyllane.sfmain.events.PlayerJoinEventListener;
-import io.github.meyllane.sfmain.elements.MasterySpecializationElement;
 import io.github.meyllane.sfmain.elements.SpeciesElement;
 import io.github.meyllane.sfmain.elements.MasteryElement;
 import io.github.meyllane.sfmain.application.loaders.MasteryLoader;
@@ -38,7 +38,7 @@ public final class SFMain extends JavaPlugin {
     public static final ElementRegistry<TraitElement> traitsRegistry = new ElementRegistry<>();
     public static final ElementRegistry<SpeciesElement> speciesRegistry = new ElementRegistry<>();
     public static final ElementRegistry<MasteryElement> masteriesRegistry = new ElementRegistry<>();
-    public static final ElementRegistry<MasterySpecializationElement> masterySpecializationsRegistry = new ElementRegistry<>();
+    public static final ElementRegistry<MasterySpeElement> masterySpecializationsRegistry = new ElementRegistry<>();
 
     public static UserService userService;
 
@@ -70,15 +70,15 @@ public final class SFMain extends JavaPlugin {
         SpeciesLoader.load(speciesConfig);
         MasteryLoader.load(masteriesConfig);
 
-        UserRepository userRepository = new UserRepository(sessionFactory);
-        UserRegistry userRegistry = new UserRegistry();
-        userService = new UserService(userRepository, userRegistry);
-        userService.loadAllUsers();
-
         ProfileRepository profileRepository = new ProfileRepository(sessionFactory);
         profileRegistry = new ProfileRegistry();
         profileService = new ProfileService(profileRepository, profileRegistry);
         profileService.loadAllProfiles();
+
+        UserRepository userRepository = new UserRepository(sessionFactory);
+        UserRegistry userRegistry = new UserRegistry();
+        userService = new UserService(userRepository, userRegistry);
+        userService.loadAllUsers();
 
         this.getLogger().log(Level.INFO, "Loaded " + profileRegistry.values().size() + " Profiles from the database.");
 

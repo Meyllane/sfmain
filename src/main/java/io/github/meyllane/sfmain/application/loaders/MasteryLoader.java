@@ -2,7 +2,7 @@ package io.github.meyllane.sfmain.application.loaders;
 
 import io.github.meyllane.sfmain.SFMain;
 import io.github.meyllane.sfmain.elements.MasteryElement;
-import io.github.meyllane.sfmain.elements.MasterySpecializationElement;
+import io.github.meyllane.sfmain.elements.MasterySpeElement;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.util.*;
@@ -12,42 +12,29 @@ public class MasteryLoader {
     private static final SFMain plugin = SFMain.getPlugin(SFMain.class);
 
     private static void loadMasteries(YamlConfiguration config) {
-
-        List<Map<?, ?>> candidate = config.getMapList("masteries");
-
-        for (Map<?, ?> elem : candidate) {
-            MasteryElement masteryElement = new MasteryElement(
+        config.getMapList("masteries").forEach(elem -> {
+            SFMain.masteriesRegistry.register(new MasteryElement(
                     (int) elem.get("ID"),
                     (String) elem.get("name")
-            );
-
-            SFMain.masteriesRegistry.register(masteryElement);
-        }
+            ));
+        });
 
         plugin.getLogger().log(Level.INFO, "Registered " + SFMain.masteriesRegistry.count() + " Masteries.");
     }
 
-    private static HashMap<Integer, ArrayList<MasterySpecializationElement>> loadMasterySpe(YamlConfiguration config) {
-        HashMap<Integer, ArrayList<MasterySpecializationElement>> map = new HashMap<>();
+    private static Map<Integer, List<MasterySpeElement>> loadMasterySpe(YamlConfiguration config) {
+        Map<Integer, List<MasterySpeElement>> map = new HashMap<>();
 
-        List<Map<?, ?>> candidate = config.getMapList("mastery_specializations");
-
-        for (Map<?, ?> elem : candidate) {
-            MasterySpecializationElement spe = new MasterySpecializationElement(
+        config.getMapList("mastery_specializations").forEach(elem -> {
+            MasterySpeElement spe = new MasterySpeElement(
                     (Integer) elem.get("ID"),
                     (String) elem.get("name"),
                     (Integer) elem.get("mastery_ID")
             );
 
-            if (!map.containsKey(spe.getMasteryId())) {
-                map.put(spe.getMasteryId(), new ArrayList<>());
-            }
-
             SFMain.masterySpecializationsRegistry.register(spe);
-
-            map.get(spe.getMasteryId())
-                    .add(spe);
-        }
+            map.computeIfAbsent(spe.getMasteryId(), k -> new ArrayList<>()).add(spe);
+        });
 
         plugin.getLogger().log(Level.INFO, "Registered " + SFMain.masterySpecializationsRegistry.count() + " individual Mastery Specialization.");
 
@@ -55,17 +42,16 @@ public class MasteryLoader {
     }
 
     private static void attributeMasterySpe(Collection<MasteryElement> masteries, YamlConfiguration config) {
-        HashMap<Integer, ArrayList<MasterySpecializationElement>> speMap = loadMasterySpe(config);
-        for (MasteryElement masteryElement : masteries) {
-            ArrayList<MasterySpecializationElement> specializations = speMap.get(masteryElement.getId());
+        Map<Integer, List<MasterySpeElement>> speMap = loadMasterySpe(config);
 
-            if (specializations == null) continue;
+        masteries.forEach(masteryElement -> {
+            List<MasterySpeElement> specializations = speMap.get(masteryElement.getId());
+            if (specializations == null) return;
 
-            masteryElement.setSpecializations(specializations);
+            masteryElement.setSpecializations(new HashSet<>(specializations));
             plugin.getLogger().log(Level.INFO,
-                    "Attributed " + specializations.size() + " Specializations to the Mastery " + masteryElement.getName() + "."
-            );
-        }
+                    "Attributed " + specializations.size() + " Specializations to the Mastery " + masteryElement.getName() + ".");
+        });
     }
 
     public static void load(YamlConfiguration config) {

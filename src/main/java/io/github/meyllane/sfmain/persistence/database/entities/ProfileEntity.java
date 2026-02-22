@@ -1,6 +1,7 @@
 package io.github.meyllane.sfmain.persistence.database.entities;
 
 import io.github.meyllane.sfmain.domain.Profile;
+import io.github.meyllane.sfmain.domain.ProfileMastery;
 import io.github.meyllane.sfmain.domain.ProfileTrait;
 import io.github.meyllane.sfmain.persistence.database.converters.SpeciesConverter;
 import io.github.meyllane.sfmain.errors.SFException;
@@ -8,10 +9,7 @@ import io.github.meyllane.sfmain.elements.SpeciesElement;
 import io.github.meyllane.sfmain.elements.TraitElement;
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -37,7 +35,7 @@ public class ProfileEntity {
     @OneToMany(mappedBy = ProfileTraitEntity_.PROFILE, cascade = {CascadeType.REMOVE, CascadeType.PERSIST}, orphanRemoval = true)
     private Set<ProfileTraitEntity> profileTraitEntities = new HashSet<>();
 
-    @OneToOne(mappedBy = ProfileMasteryEntity_.PROFILE)
+    @OneToOne(mappedBy = ProfileMasteryEntity_.PROFILE, cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private ProfileMasteryEntity profileMastery;
 
     @JoinColumn(name = "user_ID")
@@ -126,29 +124,35 @@ public class ProfileEntity {
         description = domain.getDescription();
         speciesElement = domain.getSpeciesElement();
 
+        if (profileMastery == null && domain.getProfileMastery() != null) {
+            this.profileMastery = new ProfileMasteryEntity(this);
+        }
+
         if (profileMastery != null) profileMastery.syncFromDomain(domain.getProfileMastery());
 
         syncProfileTrait(domain);
     }
 
     protected void syncProfileTrait(Profile domain) {
-        Set<TraitElement> domainTrait = domain.getProfileTraits().stream()
-                .map(ProfileTrait::getTrait)
-                .collect(Collectors.toSet());
+        Map<TraitElement, ProfileTrait> domainTraitMap = domain.getProfileTraits().stream()
+                .collect(Collectors.toMap(ProfileTrait::getTrait, p -> p));
 
-        //Removing ProfileTraitEntity if their Domain-equivalents were removed from the Domain
-        profileTraitEntities.removeIf(p -> !domainTrait.contains(p.getTrait()));
+        Map<TraitElement, ProfileTraitEntity> entityTraitMap = profileTraitEntities.stream()
+                .collect(Collectors.toMap(ProfileTraitEntity::getTrait, p -> p));
 
-        //Adding ProfileTraitEntity if their Domain-equivalents were added to the Domain
-        Set<TraitElement> entityTrait = profileTraitEntities.stream()
-                .map(ProfileTraitEntity::getTrait)
-                .collect(Collectors.toSet());
+        // Removing ProfileTraitEntity if their Domain-equivalents were removed from the Domain
+        profileTraitEntities.removeIf(p -> !domainTraitMap.containsKey(p.getTrait()));
 
-        for (TraitElement trait : domainTrait) {
-            if (entityTrait.contains(trait)) continue;
+        for (Map.Entry<TraitElement, ProfileTrait> entry : domainTraitMap.entrySet()) {
+            ProfileTraitEntity entity = entityTraitMap.get(entry.getKey());
 
-            ProfileTraitEntity entity = new ProfileTraitEntity(trait, this);
-            profileTraitEntities.add(entity);
+            if (entity == null) {
+                // Adding ProfileTraitEntity if their Domain-equivalents were added to the Domain
+                profileTraitEntities.add(new ProfileTraitEntity(entry.getKey(), this));
+            } else if (!entry.getValue().getSpecialization().equals(entity.getSpecialization())) {
+                // Syncing specialization
+                entity.setSpecialization(entry.getValue().getSpecialization());
+            }
         }
     }
 }

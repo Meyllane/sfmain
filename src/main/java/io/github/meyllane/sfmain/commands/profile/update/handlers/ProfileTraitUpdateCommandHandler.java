@@ -21,8 +21,8 @@ public class ProfileTraitUpdateCommandHandler extends ProfileUpdateCommandHandle
     private final String SPECIALIZATION_VALUE_NODE_NAME = "specializationValue";
 
     @Override
-    public LiteralArgument buildBranch() {
-        return (LiteralArgument) new LiteralArgument("traits")
+    public Argument<String> buildBranch() {
+        return new LiteralArgument("traits")
                 .thenNested(
                         new MultiLiteralArgument(
                                 ProfileUpdateCommand.UPDATE_OPERATION_NODE_NAME,
@@ -41,7 +41,7 @@ public class ProfileTraitUpdateCommandHandler extends ProfileUpdateCommandHandle
                                     Profile profile = info.previousArgs().getByClass(ProfileUpdateCommand.PROFILE_NODE_NAME, Profile.class);
                                     if (profile == null) return new String[0];
 
-                                    return getPossessedTraitNames(profile);
+                                    return getOwnedTraitNames(profile);
                                 })
                         ),
                         new GreedyStringArgument(SPECIALIZATION_VALUE_NODE_NAME)
@@ -59,13 +59,13 @@ public class ProfileTraitUpdateCommandHandler extends ProfileUpdateCommandHandle
 
             return switch(operation) {
                 case ADD -> getMissingTraitNames(profile);
-                case REMOVE -> getPossessedTraitNames(profile);
-                case UPDATE -> null;
+                case REMOVE -> getOwnedTraitNames(profile);
+                case UPDATE, SET -> null;
             };
         });
     }
 
-    private String @NonNull [] getPossessedTraitNames(Profile profile) {
+    private String @NonNull [] getOwnedTraitNames(Profile profile) {
         return profile.getProfileTraitsName().toArray(new String[0]);
     }
 
@@ -80,7 +80,7 @@ public class ProfileTraitUpdateCommandHandler extends ProfileUpdateCommandHandle
     @Override
     ProfileTrait parse(CommandArguments args) {
         String traitName = args.getByClassOrDefault(ProfileUpdateCommand.UPDATE_VALUE_NODE_NAME, String.class, "");
-        String specialization = args.getByClassOrDefault(SPECIALIZATION_UPDATE_NODE_NAME, String.class, "");
+        String specialization = args.getByClassOrDefault(SPECIALIZATION_VALUE_NODE_NAME, String.class, "");
 
         if (traitName.isEmpty()) {
             throw new SFException("Le nom du trait n'est pas reconnu");

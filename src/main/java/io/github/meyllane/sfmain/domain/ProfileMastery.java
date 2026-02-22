@@ -1,11 +1,17 @@
 package io.github.meyllane.sfmain.domain;
 
 import io.github.meyllane.sfmain.elements.MasteryElement;
+import io.github.meyllane.sfmain.elements.MasterySpeElement;
 import io.github.meyllane.sfmain.persistence.database.entities.ProfileMasteryEntity;
+import io.github.meyllane.sfmain.persistence.database.entities.ProfileMasterySpeEntity;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class ProfileMastery {
     private MasteryElement masteryElement;
     private int level;
+    private Set<MasterySpeElement> masterySpecializations = new HashSet<>();
 
     public ProfileMastery(MasteryElement masteryElement, int level) {
         this.masteryElement = masteryElement;
@@ -20,11 +26,25 @@ public class ProfileMastery {
         return level;
     }
 
+    public Set<MasterySpeElement> getMasterySpecializations() {
+        return masterySpecializations;
+    }
+
+    public void setMasterySpecializations(Set<MasterySpeElement> masterySpecializations) {
+        this.masterySpecializations = masterySpecializations;
+    }
+
     public static ProfileMastery fromEntity(ProfileMasteryEntity entity) {
-        return new ProfileMastery(
+        ProfileMastery profileMastery = new ProfileMastery(
                 entity.getMasteryElement(),
                 entity.getLevel()
         );
+
+        for (ProfileMasterySpeEntity speEntity : entity.getProfileMasterySpeEntities()) {
+            profileMastery.masterySpecializations.add(speEntity.getMasterySpecializationElement());
+        }
+
+        return profileMastery;
     }
 
     @Override

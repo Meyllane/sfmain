@@ -59,6 +59,10 @@ public class ProfileTraitEntity {
         this.profile = profile;
     }
 
+    public void setSpecialization(String specialization) {
+        this.specialization = specialization;
+    }
+
     @Override
     public boolean equals(Object obj) {
         return obj.getClass() == this.getClass() && ((ProfileTraitEntity) obj).trait.equals(trait);

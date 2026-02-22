@@ -1,5 +1,9 @@
 package io.github.meyllane.sfmain.domain;
 
+import io.github.meyllane.sfmain.SFMain;
+import io.github.meyllane.sfmain.application.registries.ElementRegistry;
+import io.github.meyllane.sfmain.elements.MasteryElement;
+import io.github.meyllane.sfmain.elements.MasterySpeElement;
 import io.github.meyllane.sfmain.elements.SpeciesElement;
 import io.github.meyllane.sfmain.elements.TraitElement;
 import io.github.meyllane.sfmain.errors.SFException;
@@ -13,6 +17,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Profile {
+    private static final ElementRegistry<MasteryElement> masteriesRegistry = SFMain.masteriesRegistry;
+
     private Long id;
     private String name;
     private int age;
@@ -95,6 +101,35 @@ public class Profile {
 
     public void setSpeciesElement(SpeciesElement speciesElement) {
         this.speciesElement = speciesElement;
+    }
+
+    public void setProfileMastery(ProfileMastery profileMastery) {
+        if (this.profileMastery != null && shouldRemoveMasterySpe(profileMastery)) {
+            this.profileMastery.setMasterySpecializations(new HashSet<>());
+        }
+
+        this.profileMastery = profileMastery;
+    }
+
+    public void addMasterySpeElement(MasterySpeElement masterySpeElement) {
+        if (!this.profileMastery.getMasteryElement().getSpecializations().contains(masterySpeElement)) {
+            throw new SFException("La spécialisation demandée n'est pas compatible avec la maîtrise actuelle du profile.");
+        }
+
+        if (!this.profileMastery.getMasterySpecializations().add(masterySpeElement)) {
+            throw new SFException("Le profile possède déjà la spécialisation " + masterySpeElement.getName() + ".");
+        }
+    }
+
+    public void removeMasterySpeElement(MasterySpeElement masterySpeElement) {
+        if (!this.profileMastery.getMasterySpecializations().remove(masterySpeElement)) {
+            throw new SFException("Le profile ne possède pas déjà la spécialisation " + masterySpeElement.getName() + ".");
+        }
+    }
+
+    //Checks if we need to remove all previous specialization when changing the ProfileMastery
+    private boolean shouldRemoveMasterySpe(ProfileMastery newProfileMastery) {
+        return !newProfileMastery.getMasteryElement().equals(this.profileMastery.getMasteryElement());
     }
 
     public void addProfileTrait(ProfileTrait profileTrait) {

@@ -3,8 +3,9 @@ package io.github.meyllane.sfmain.commands.profile.update;
 public enum ProfileUpdateOperation {
     ADD("add"),
     REMOVE("remove"),
-    UPDATE("update");
-    private String name;
+    UPDATE("update"),
+    SET("set");
+    private final String name;
 
     ProfileUpdateOperation(String name) {
         this.name = name;

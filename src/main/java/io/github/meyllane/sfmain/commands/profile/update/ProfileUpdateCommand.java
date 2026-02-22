@@ -1,14 +1,10 @@
 package io.github.meyllane.sfmain.commands.profile.update;
 
 import dev.jorel.commandapi.arguments.LiteralArgument;
-import dev.jorel.commandapi.exceptions.WrapperCommandSyntaxException;
 import dev.jorel.commandapi.executors.CommandArguments;
 import io.github.meyllane.sfmain.SFMain;
 import io.github.meyllane.sfmain.commands.arguments.ProfileArgument;
-import io.github.meyllane.sfmain.commands.profile.update.handlers.AgeProfileUpdateCommandHandler;
-import io.github.meyllane.sfmain.commands.profile.update.handlers.NameProfileUpdateCommandHandler;
-import io.github.meyllane.sfmain.commands.profile.update.handlers.ProfileTraitUpdateCommandHandler;
-import io.github.meyllane.sfmain.commands.profile.update.handlers.SpeciesProfileUpdateCommandHandler;
+import io.github.meyllane.sfmain.commands.profile.update.handlers.*;
 import io.github.meyllane.sfmain.domain.Profile;
 import io.github.meyllane.sfmain.elements.SpeciesElement;
 import io.github.meyllane.sfmain.application.registries.ElementRegistry;
@@ -43,6 +39,9 @@ public class ProfileUpdateCommand {
                                 .then(new NameProfileUpdateCommandHandler().buildBranch())
                                 .then(new ProfileTraitUpdateCommandHandler().buildBranch())
                                 .then(new SpeciesProfileUpdateCommandHandler().buildBranch())
+                                .then(new ProfileMasteryUpdateCommandHandler().buildBranch()
+                                        .then(new ProfileMasterySpeUpdateCommandHandler().buildBranch())
+                                )
                 );
     }
 

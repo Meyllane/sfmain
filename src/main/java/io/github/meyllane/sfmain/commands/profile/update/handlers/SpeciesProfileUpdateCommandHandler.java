@@ -1,5 +1,6 @@
 package io.github.meyllane.sfmain.commands.profile.update.handlers;
 
+import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
@@ -8,7 +9,6 @@ import io.github.meyllane.sfmain.SFMain;
 import io.github.meyllane.sfmain.commands.profile.update.ProfileUpdateCommand;
 import io.github.meyllane.sfmain.commands.profile.update.ProfileUpdateOperation;
 import io.github.meyllane.sfmain.domain.Profile;
-import io.github.meyllane.sfmain.persistence.database.entities.ProfileEntity;
 import io.github.meyllane.sfmain.errors.SFException;
 import io.github.meyllane.sfmain.elements.SpeciesElement;
 import io.github.meyllane.sfmain.application.registries.ElementRegistry;
@@ -17,8 +17,8 @@ public class SpeciesProfileUpdateCommandHandler extends ProfileUpdateCommandHand
     private final ElementRegistry<SpeciesElement> speciesRegistry = SFMain.speciesRegistry;
 
     @Override
-    public LiteralArgument buildBranch() {
-        return (LiteralArgument) new LiteralArgument("species")
+    public Argument<String> buildBranch() {
+        return new LiteralArgument("species")
                 .then(
                         new StringArgument(ProfileUpdateCommand.UPDATE_VALUE_NODE_NAME).replaceSuggestions(
                                 ArgumentSuggestions.strings(speciesRegistry.getNames().toArray(String[]::new))
