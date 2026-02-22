@@ -6,6 +6,7 @@ import io.github.meyllane.sfmain.errors.SFException;
 import io.github.meyllane.sfmain.elements.SpeciesElement;
 import io.github.meyllane.sfmain.application.registries.ElementRegistry;
 import io.github.meyllane.sfmain.persistence.database.entities.ProfileEntity_;
+import io.github.meyllane.sfmain.persistence.database.entities.ProfileMasteryEntity_;
 import jakarta.persistence.EntityGraph;
 import org.hibernate.SessionFactory;
 import org.hibernate.exception.ConstraintViolationException;
@@ -24,6 +25,7 @@ public class ProfileRepository {
         EntityGraph<ProfileEntity> graph = sessionFactory.createEntityGraph(ProfileEntity.class);
 
         graph.addElementSubgraph(ProfileEntity_.profileTraitEntities);
+        graph.addSubgraph(ProfileEntity_.profileMastery);
 
         return sessionFactory.fromTransaction(session -> {
             return session.createSelectionQuery("FROM ProfileEntity", ProfileEntity.class)

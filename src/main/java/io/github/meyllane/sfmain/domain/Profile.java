@@ -97,24 +97,23 @@ public class Profile {
         this.speciesElement = speciesElement;
     }
 
-    public void addProfileTrait(TraitElement trait) {
-        ProfileTrait newTrait = new ProfileTrait(trait);
-
-        System.out.println(newTrait.getTrait().toString());
-        for (ProfileTrait t : profileTraits) {
-            System.out.println(t.getTrait().toString());
-        }
-
-        if (!profileTraits.add(newTrait)) {
-            throw new SFException("Ce profile a déjà le trait " + trait.getName() + ".");
+    public void addProfileTrait(ProfileTrait profileTrait) {
+        if (!profileTraits.add(profileTrait)) {
+            throw new SFException("Ce profile a déjà le trait " + profileTrait.getTrait().getName() + ".");
         }
     }
 
-    public void removeProfileTrait(TraitElement trait) {
-        ProfileTrait toRemove = new ProfileTrait(trait);
+    public void removeProfileTrait(ProfileTrait profileTrait) {
+        if (!profileTraits.remove(profileTrait)) {
+            throw new SFException("Ce profile ne posséde pas le trait " + profileTrait.getTrait().getName() + ".");
+        }
+    }
 
-        if (!profileTraits.remove(toRemove)) {
-            throw new SFException("Ce profile ne posséde pas le trait " + trait.getName() + ".");
+    public void updateProfileTrait(ProfileTrait profileTrait) {
+        for (ProfileTrait p : profileTraits) {
+            if (!p.equals(profileTrait)) continue;
+
+            p.setSpecialization(profileTrait.getSpecialization());
         }
     }
 
@@ -132,7 +131,8 @@ public class Profile {
                 .collect(Collectors.toSet())
         );
 
-        profile.profileMastery = ProfileMastery.fromEntity(entity.getProfileMastery());
+        if (entity.getProfileMastery() != null)
+            profile.profileMastery = ProfileMastery.fromEntity(entity.getProfileMastery());
 
         return profile;
     }

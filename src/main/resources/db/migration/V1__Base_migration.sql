@@ -32,3 +32,10 @@ CREATE TABLE profile_mastery(
     mastery_ID INT,
     level INT default 1
 );
+
+CREATE TABLE profile_mastery_specialization(
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    profile_mastery_ID INT,
+    FOREIGN KEY (profile_mastery_ID) REFERENCES profile_mastery(ID),
+    specialization_ID INT
+);

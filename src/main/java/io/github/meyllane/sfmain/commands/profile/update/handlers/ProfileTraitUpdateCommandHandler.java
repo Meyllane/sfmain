@@ -1,24 +1,24 @@
 package io.github.meyllane.sfmain.commands.profile.update.handlers;
 
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
-import dev.jorel.commandapi.arguments.LiteralArgument;
-import dev.jorel.commandapi.arguments.MultiLiteralArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
+import dev.jorel.commandapi.arguments.*;
 import dev.jorel.commandapi.executors.CommandArguments;
 import io.github.meyllane.sfmain.SFMain;
 import io.github.meyllane.sfmain.commands.profile.update.ProfileUpdateCommand;
 import io.github.meyllane.sfmain.commands.profile.update.ProfileUpdateOperation;
 import io.github.meyllane.sfmain.domain.Profile;
-import io.github.meyllane.sfmain.persistence.database.entities.ProfileEntity;
+import io.github.meyllane.sfmain.domain.ProfileTrait;
 import io.github.meyllane.sfmain.errors.SFException;
 import io.github.meyllane.sfmain.elements.TraitElement;
 import io.github.meyllane.sfmain.application.registries.ElementRegistry;
 import org.bukkit.command.CommandSender;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
-public class ProfileTraitUpdateCommandHandler extends ProfileUpdateCommandHandler<TraitElement> {
+public class ProfileTraitUpdateCommandHandler extends ProfileUpdateCommandHandler<ProfileTrait> {
     private final ElementRegistry<TraitElement> traitsRegistry = SFMain.traitsRegistry;
+    private final String SPECIALIZATION_UPDATE_NODE_NAME = "specialization";
+    private final String SPECIALIZATION_VALUE_NODE_NAME = "specializationValue";
 
     @Override
     public LiteralArgument buildBranch() {
@@ -33,35 +33,55 @@ public class ProfileTraitUpdateCommandHandler extends ProfileUpdateCommandHandle
                                 processSuggestions()
                         )
                                 .executesPlayer(this::execute)
+                )
+                .thenNested(
+                        new LiteralArgument(SPECIALIZATION_UPDATE_NODE_NAME),
+                        new StringArgument(ProfileUpdateCommand.UPDATE_VALUE_NODE_NAME).replaceSuggestions(
+                                ArgumentSuggestions.strings(info -> {
+                                    Profile profile = info.previousArgs().getByClass(ProfileUpdateCommand.PROFILE_NODE_NAME, Profile.class);
+                                    if (profile == null) return new String[0];
+
+                                    return getPossessedTraitNames(profile);
+                                })
+                        ),
+                        new GreedyStringArgument(SPECIALIZATION_VALUE_NODE_NAME)
+                                .executesPlayer(this::execute)
                 );
     }
 
     private ArgumentSuggestions<CommandSender> processSuggestions() {
         return ArgumentSuggestions.strings(info -> {
             Profile profile = info.previousArgs().getByClass(ProfileUpdateCommand.PROFILE_NODE_NAME, Profile.class);
-            String operation = info.previousArgs().getByClassOrDefault(ProfileUpdateCommand.UPDATE_OPERATION_NODE_NAME, String.class, "");
+            String operationName = info.previousArgs().getByClassOrDefault(ProfileUpdateCommand.UPDATE_OPERATION_NODE_NAME, String.class, "");
+            ProfileUpdateOperation operation = ProfileUpdateOperation.getByName(operationName);
 
-            if (profile == null || operation.isEmpty()) return new String[0];
+            if (profile == null) return new String[0];
 
-            if (operation.equals(ProfileUpdateOperation.ADD.getName())) { //Show the Traits that the profile does not have
-                List<String> profileTraitsName = profile.getProfileTraitsName();
-
-                return traitsRegistry.getNames().stream()
-                        .filter(name -> !profileTraitsName.contains(name))
-                        .toArray(String[]::new);
-            }
-
-            if (operation.equals(ProfileUpdateOperation.REMOVE.getName())) { //Show the Traits that the profile has
-                return profile.getProfileTraitsName().toArray(new String[0]);
-            }
-
-            return new String[0];
+            return switch(operation) {
+                case ADD -> getMissingTraitNames(profile);
+                case REMOVE -> getPossessedTraitNames(profile);
+                case UPDATE -> null;
+            };
         });
     }
 
+    private String @NonNull [] getPossessedTraitNames(Profile profile) {
+        return profile.getProfileTraitsName().toArray(new String[0]);
+    }
+
+    private String @NonNull [] getMissingTraitNames(Profile profile) {
+        List<String> profileTraitsName = profile.getProfileTraitsName();
+
+        return traitsRegistry.getNames().stream()
+                .filter(name -> !profileTraitsName.contains(name))
+                .toArray(String[]::new);
+    }
+
     @Override
-    TraitElement parse(CommandArguments args) {
+    ProfileTrait parse(CommandArguments args) {
         String traitName = args.getByClassOrDefault(ProfileUpdateCommand.UPDATE_VALUE_NODE_NAME, String.class, "");
+        String specialization = args.getByClassOrDefault(SPECIALIZATION_UPDATE_NODE_NAME, String.class, "");
+
         if (traitName.isEmpty()) {
             throw new SFException("Le nom du trait n'est pas reconnu");
         }
@@ -72,15 +92,15 @@ public class ProfileTraitUpdateCommandHandler extends ProfileUpdateCommandHandle
             throw new SFException("Le nom du trait n'est pas reconnu");
         }
 
-        return trait;
+        return new ProfileTrait(trait, specialization);
     }
 
     @Override
-    protected void update(Profile profile, TraitElement updateValue, ProfileUpdateOperation operation) {
+    protected void update(Profile profile, ProfileTrait updateValue, ProfileUpdateOperation operation) {
         switch (operation) {
             case ADD -> profile.addProfileTrait(updateValue);
             case REMOVE -> profile.removeProfileTrait(updateValue);
-            case UPDATE -> throw new RuntimeException("Illegal update operation");
+            case UPDATE -> profile.updateProfileTrait(updateValue);
         }
     }
 }

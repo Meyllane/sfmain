@@ -4,7 +4,7 @@ import io.github.meyllane.sfmain.elements.TraitElement;
 import io.github.meyllane.sfmain.persistence.database.entities.ProfileTraitEntity;
 
 public class ProfileTrait {
-    private TraitElement trait;
+    private final TraitElement trait;
     private String specialization;
 
     public ProfileTrait(TraitElement trait, String specialization) {
@@ -22,6 +22,10 @@ public class ProfileTrait {
 
     public String getSpecialization() {
         return specialization;
+    }
+
+    public void setSpecialization(String specialization) {
+        this.specialization = specialization;
     }
 
     public static ProfileTrait fromEntity(ProfileTraitEntity entity) {

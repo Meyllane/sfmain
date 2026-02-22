@@ -35,7 +35,7 @@ public class ProfileEntity {
     private SpeciesElement speciesElement;
 
     @OneToMany(mappedBy = ProfileTraitEntity_.PROFILE, cascade = {CascadeType.REMOVE, CascadeType.PERSIST}, orphanRemoval = true)
-    private List<ProfileTraitEntity> profileTraitEntities = new ArrayList<>();
+    private Set<ProfileTraitEntity> profileTraitEntities = new HashSet<>();
 
     @OneToOne(mappedBy = ProfileMasteryEntity_.PROFILE)
     private ProfileMasteryEntity profileMastery;
@@ -68,7 +68,7 @@ public class ProfileEntity {
         this.name = name;
     }
 
-    public List<ProfileTraitEntity> getProfileTraits() {
+    public Set<ProfileTraitEntity> getProfileTraits() {
         return profileTraitEntities;
     }
 
@@ -98,7 +98,7 @@ public class ProfileEntity {
         this.speciesElement = speciesElement;
     }
 
-    public List<ProfileTraitEntity> getProfileTraitEntities() {
+    public Set<ProfileTraitEntity> getProfileTraitEntities() {
         return profileTraitEntities;
     }
 
@@ -126,7 +126,7 @@ public class ProfileEntity {
         description = domain.getDescription();
         speciesElement = domain.getSpeciesElement();
 
-        profileMastery.syncFromDomain(domain.getProfileMastery());
+        if (profileMastery != null) profileMastery.syncFromDomain(domain.getProfileMastery());
 
         syncProfileTrait(domain);
     }
