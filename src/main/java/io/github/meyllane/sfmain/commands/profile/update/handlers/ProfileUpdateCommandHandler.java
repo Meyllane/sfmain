@@ -6,7 +6,6 @@ import dev.jorel.commandapi.executors.CommandArguments;
 import io.github.meyllane.sfmain.commands.profile.update.ProfileUpdateCommand;
 import io.github.meyllane.sfmain.commands.profile.update.ProfileUpdateOperation;
 import io.github.meyllane.sfmain.domain.Profile;
-import io.github.meyllane.sfmain.errors.SFException;
 import io.github.meyllane.sfmain.utils.PluginCommandHelper;
 import org.bukkit.entity.Player;
 
