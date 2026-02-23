@@ -1,7 +1,6 @@
 package io.github.meyllane.sfmain;
 
-import io.github.meyllane.sfmain.commands.UserCommand;
-import io.github.meyllane.sfmain.commands.profile.ProfileCommand;
+import io.github.meyllane.sfmain.commands.user.UserCommand;
 import io.github.meyllane.sfmain.elements.MasterySpeElement;
 import io.github.meyllane.sfmain.persistence.database.HibernateUtil;
 import io.github.meyllane.sfmain.events.PlayerJoinEventListener;
@@ -88,7 +87,6 @@ public final class SFMain extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new PlayerJoinEventListener(userService, this), this);
 
         //Command registration
-        new ProfileCommand().register();
         UserCommand.register();
     }
 

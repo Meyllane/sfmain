@@ -78,7 +78,7 @@ public class UserEntity {
     }
 
     public void removeProfile(ProfileEntity profile) {
-        profiles.remove(profile);
+        profiles.removeIf(profileEntity -> profileEntity.equals(profile));
         profile.setUser(null);
     }
 
