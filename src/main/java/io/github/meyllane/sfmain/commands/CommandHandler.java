@@ -101,33 +101,31 @@ public abstract class CommandHandler<T, V> {
      * @param plugin the plugin instance used to schedule tasks
      */
     public void handleExecution(Player player, CommandArguments args, Plugin plugin) {
+        CommandResult<T, V> result;
+
+        try {
+            V updateValue = this.parse(args);
+            T target = Objects.requireNonNull(args.getByClass(TARGET_NODE, this.getTargetClass()));
+            CommandOperation operation = this.getOperation(args);
+
+            this.update(target, updateValue, operation);
+            result = new CommandResult<>(target, updateValue, operation);
+        } catch (Exception e) {
+            this.handleErrors(e, player);
+            return;
+        }
+
+        final CommandResult<T, V> finalResult = result;
+
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            Throwable ex = null;
-            CommandResult<T, V> result = null;
-
             try {
-                V updateValue = this.parse(args);
-                T target = Objects.requireNonNull(args.getByClass(TARGET_NODE, this.getTargetClass()));
-                CommandOperation operation = this.getOperation(args);
-
-                this.update(target, updateValue, operation);
-                this.persist(target);
-                result = new CommandResult<>(target, updateValue, operation);
+                this.persist(finalResult.target());
             } catch (Exception e) {
-                ex = e;
+                Bukkit.getScheduler().runTask(plugin, () -> this.handleErrors(e, player));
+                return;
             }
 
-            final Throwable finalEx = ex;
-            final CommandResult<T, V> finalResult = result;
-
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                if (finalEx != null) {
-                    this.handleErrors(finalEx, player);
-                    return;
-                };
-
-                this.handleCompletion(finalResult, player);
-            });
+            Bukkit.getScheduler().runTask(plugin, () -> this.handleCompletion(finalResult, player));
         });
     }
 
