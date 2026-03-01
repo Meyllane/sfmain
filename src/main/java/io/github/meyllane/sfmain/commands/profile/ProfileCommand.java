@@ -7,10 +7,7 @@ import io.github.meyllane.sfmain.commands.arguments.ProfileArgument;
 import io.github.meyllane.sfmain.commands.arguments.SpeciesArgument;
 import io.github.meyllane.sfmain.commands.core.ModelUpdateCommandHandler;
 import io.github.meyllane.sfmain.commands.profile.handlers.create.ProfileCreateCommandHandler;
-import io.github.meyllane.sfmain.commands.profile.handlers.update.AgeProfileUpdateCommandHandler;
-import io.github.meyllane.sfmain.commands.profile.handlers.update.NameProfileUpdateCommandHandler;
-import io.github.meyllane.sfmain.commands.profile.handlers.update.SpeciesProfileUpdateCommandHandler;
-import io.github.meyllane.sfmain.commands.profile.handlers.update.TraitProfileUpdateCommandHandler;
+import io.github.meyllane.sfmain.commands.profile.handlers.update.*;
 
 public class ProfileCommand {
 
@@ -25,6 +22,7 @@ public class ProfileCommand {
                                 .then(new NameProfileUpdateCommandHandler().buildBranch())
                                 .then(new SpeciesProfileUpdateCommandHandler().buildBranch())
                                 .then(new TraitProfileUpdateCommandHandler().buildBranch())
+                                .then(new MasteryProfileUpdateCommandHandler().buildBranch())
                 )
                 .register();
     }

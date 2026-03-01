@@ -58,4 +58,8 @@ public class MasterySpeElementRegistry extends ElementRegistry<MasterySpeElement
         this.register(masterySpeElement);
         this.registerLink(masterySpeElement, parent);
     }
+
+    public Set<MasterySpeElement> getSpe(MasteryElement masteryElement) {
+        return this.byMastery.get(masteryElement);
+    }
 }

@@ -104,17 +104,16 @@ public class Profile {
     }
 
     public void setProfileMastery(ProfileMastery profileMastery) {
-        if (this.profileMastery != null && shouldRemoveMasterySpe(profileMastery)) {
-            this.profileMastery.setMasterySpecializations(new HashSet<>());
-        }
-
         this.profileMastery = profileMastery;
     }
 
     public void addMasterySpeElement(MasterySpeElement masterySpeElement) {
-        if (!this.profileMastery.getMasteryElement().getSpecializations().contains(masterySpeElement)) {
-            throw new SFException(ErrorMessage.get("profile.mastery_and_spe_incompatibility"));
+        Set<MasterySpeElement> allowedSpe = SFMain.masterySpeElementRegistry.getSpe(this.getProfileMastery().getMasteryElement());
+
+        if (!allowedSpe.contains(masterySpeElement)) {
+            throw new SFException(ErrorMessage.get("profile.forbidden_spe_mastery"));
         }
+
 
         if (!this.profileMastery.getMasterySpecializations().add(masterySpeElement)) {
             throw new SFException(ErrorMessage.get("profile.duplicate_spe"));
@@ -125,11 +124,6 @@ public class Profile {
         if (!this.profileMastery.getMasterySpecializations().remove(masterySpeElement)) {
             throw new SFException(ErrorMessage.get("profile.missing_spe"));
         }
-    }
-
-    //Checks if we need to remove all previous specialization when changing the ProfileMastery
-    private boolean shouldRemoveMasterySpe(ProfileMastery newProfileMastery) {
-        return !newProfileMastery.getMasteryElement().equals(this.profileMastery.getMasteryElement());
     }
 
     public void addProfileTrait(ProfileTrait profileTrait) {
@@ -144,12 +138,8 @@ public class Profile {
         }
     }
 
-    public void updateProfileTrait(ProfileTrait profileTrait) {
-        for (ProfileTrait p : profileTraits) {
-            if (!p.equals(profileTrait)) continue;
-
-            p.setSpecialization(profileTrait.getSpecialization());
-        }
+    public void resetProfileMasterySpe() {
+        this.profileMastery.setMasterySpecializations(new HashSet<>());
     }
 
     public static Profile fromEntity(ProfileEntity entity) {

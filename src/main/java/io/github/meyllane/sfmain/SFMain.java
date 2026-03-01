@@ -55,17 +55,7 @@ public final class SFMain extends JavaPlugin {
 
         HikariDataSource datasource;
 
-        try {
-            if (IS_DEV) {
-                this.getLogger().log(Level.INFO, "SFMain is running in a DEV environment.");
-                datasource = DatabaseLoader.getDevDataSource();
-                Server.createTcpServer("-tcpPort", "9092", "-tcpAllowOthers").start();
-            } else {
-                datasource = DatabaseLoader.getDataSource(databaseConfig);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        datasource = DatabaseLoader.getDataSource(databaseConfig);
 
         FlywayMigrator.migrate(datasource);
         sessionFactory = HibernateUtil.buildSessionFactory(datasource);
@@ -75,7 +65,6 @@ public final class SFMain extends JavaPlugin {
         speciesElementRegistry.load(speciesConfig);
         masteriesElementRegistry.load(masteriesConfig);
         masterySpeElementRegistry.load(masteriesConfig);
-
 
         profileEntityRepository = new ProfileEntityRepository(sessionFactory);
         profileRegistry = new ProfileRegistry();

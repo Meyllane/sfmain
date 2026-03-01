@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ProfileMastery {
-    private final MasteryElement masteryElement;
+    private MasteryElement masteryElement;
     private int level;
     private Set<MasterySpeElement> masterySpecializations = new HashSet<>();
 
@@ -28,6 +28,10 @@ public class ProfileMastery {
 
     public Set<MasterySpeElement> getMasterySpecializations() {
         return masterySpecializations;
+    }
+
+    public void setMasteryElement(MasteryElement masteryElement) {
+        this.masteryElement = masteryElement;
     }
 
     public void setMasterySpecializations(Set<MasterySpeElement> masterySpecializations) {
