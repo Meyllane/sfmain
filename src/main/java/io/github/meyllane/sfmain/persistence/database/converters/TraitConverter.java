@@ -1,7 +1,7 @@
 package io.github.meyllane.sfmain.persistence.database.converters;
 
 import io.github.meyllane.sfmain.SFMain;
-import io.github.meyllane.sfmain.elements.TraitElement;
+import io.github.meyllane.sfmain.domain.elements.TraitElement;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
@@ -14,6 +14,6 @@ public class TraitConverter implements AttributeConverter<TraitElement, Integer>
 
     @Override
     public TraitElement convertToEntityAttribute(Integer id) {
-        return SFMain.traitsRegistry.getById(id);
+        return SFMain.traitsElementRegistry.get(id);
     }
 }

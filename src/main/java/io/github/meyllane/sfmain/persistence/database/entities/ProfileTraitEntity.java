@@ -1,7 +1,7 @@
 package io.github.meyllane.sfmain.persistence.database.entities;
 
 import io.github.meyllane.sfmain.persistence.database.converters.TraitConverter;
-import io.github.meyllane.sfmain.elements.TraitElement;
+import io.github.meyllane.sfmain.domain.elements.TraitElement;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -26,8 +26,9 @@ public class ProfileTraitEntity {
 
     public ProfileTraitEntity() {}
 
-    public ProfileTraitEntity(TraitElement trait, ProfileEntity profile) {
+    public ProfileTraitEntity(TraitElement trait, String specialization, ProfileEntity profile) {
         this.trait = trait;
+        this.specialization = specialization;
         this.profile = profile;
     }
 

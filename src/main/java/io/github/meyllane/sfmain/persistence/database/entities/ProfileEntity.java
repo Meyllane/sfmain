@@ -1,15 +1,14 @@
 package io.github.meyllane.sfmain.persistence.database.entities;
 
-import io.github.meyllane.sfmain.domain.Profile;
-import io.github.meyllane.sfmain.domain.ProfileMastery;
-import io.github.meyllane.sfmain.domain.ProfileTrait;
+import io.github.meyllane.sfmain.domain.models.Profile;
+import io.github.meyllane.sfmain.domain.models.ProfileTrait;
 import io.github.meyllane.sfmain.persistence.database.converters.SpeciesConverter;
-import io.github.meyllane.sfmain.errors.SFException;
-import io.github.meyllane.sfmain.elements.SpeciesElement;
-import io.github.meyllane.sfmain.elements.TraitElement;
+import io.github.meyllane.sfmain.domain.elements.SpeciesElement;
+import io.github.meyllane.sfmain.domain.elements.TraitElement;
 import jakarta.persistence.*;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Entity
@@ -138,25 +137,20 @@ public class ProfileEntity {
     }
 
     protected void syncProfileTrait(Profile domain) {
-        Map<TraitElement, ProfileTrait> domainTraitMap = domain.getProfileTraits().stream()
-                .collect(Collectors.toMap(ProfileTrait::getTrait, p -> p));
+        Map<Long, ProfileTrait> domainTraitMap = domain.getProfileTraits().stream()
+                .collect(Collectors.toMap(ProfileTrait::getId, Function.identity()));
 
-        Map<TraitElement, ProfileTraitEntity> entityTraitMap = profileTraitEntities.stream()
-                .collect(Collectors.toMap(ProfileTraitEntity::getTrait, p -> p));
+        this.profileTraitEntities.removeIf(entity -> !domainTraitMap.containsKey(entity.getId()));
 
-        // Removing ProfileTraitEntity if their Domain-equivalents were removed from the Domain
-        profileTraitEntities.removeIf(p -> !domainTraitMap.containsKey(p.getTrait()));
+        Map<Long, ProfileTraitEntity> entityMap = this.profileTraitEntities.stream()
+                .collect(Collectors.toMap(ProfileTraitEntity::getId, Function.identity()));
 
-        for (Map.Entry<TraitElement, ProfileTrait> entry : domainTraitMap.entrySet()) {
-            ProfileTraitEntity entity = entityTraitMap.get(entry.getKey());
-
-            if (entity == null) {
-                // Adding ProfileTraitEntity if their Domain-equivalents were added to the Domain
-                profileTraitEntities.add(new ProfileTraitEntity(entry.getKey(), this));
-            } else if (!entry.getValue().getSpecialization().equals(entity.getSpecialization())) {
-                // Syncing specialization
-                entity.setSpecialization(entry.getValue().getSpecialization());
+        domainTraitMap.forEach((id, trait) -> {
+            if (entityMap.containsKey(id)) {
+                entityMap.get(id).setSpecialization(trait.getSpecialization());
+            } else {
+                this.profileTraitEntities.add(new ProfileTraitEntity(trait.getTrait(), trait.getSpecialization(), this));
             }
-        }
+        });
     }
 }

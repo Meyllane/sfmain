@@ -1,6 +1,6 @@
 package io.github.meyllane.sfmain.persistence.database.entities;
 
-import io.github.meyllane.sfmain.elements.MasterySpeElement;
+import io.github.meyllane.sfmain.domain.elements.MasterySpeElement;
 import io.github.meyllane.sfmain.persistence.database.converters.MasterySpeConverter;
 import jakarta.persistence.*;
 

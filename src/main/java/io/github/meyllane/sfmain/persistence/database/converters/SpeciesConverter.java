@@ -1,7 +1,7 @@
 package io.github.meyllane.sfmain.persistence.database.converters;
 
 import io.github.meyllane.sfmain.SFMain;
-import io.github.meyllane.sfmain.elements.SpeciesElement;
+import io.github.meyllane.sfmain.domain.elements.SpeciesElement;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
@@ -12,6 +12,6 @@ public class SpeciesConverter implements AttributeConverter<SpeciesElement, Inte
 
     @Override
     public SpeciesElement convertToEntityAttribute(Integer id) {
-        return SFMain.speciesRegistry.getById(id);
+        return SFMain.speciesElementRegistry.get(id);
     }
 }

@@ -29,6 +29,10 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
     compileOnly ('com.mojang:brigadier:1.0.18')
+    compileOnly 'org.jetbrains:annotations:26.1.0'
+    compileOnly("dev.jorel:commandapi-bukkit-core:10.1.2")
+
+    implementation("com.h2database:h2:2.4.240")
 
     implementation("org.flywaydb:flyway-core:12.0.1")
     implementation("org.flywaydb:flyway-mysql:12.0.1")
@@ -51,7 +55,7 @@ dependencies {
 
     annotationProcessor("org.hibernate.orm:hibernate-processor:7.2.4.Final")
 
-    compileOnly("dev.jorel:commandapi-bukkit-core:10.1.2")
+
 }
 
 tasks {
@@ -59,6 +63,7 @@ tasks {
         // Configure the Minecraft version for our task.
         // This is the only required configuration besides applying the plugin.
         // Your plugin's jar (or shadowJar if present) will be used automatically.
+        //jvmArgs("-Denv=dev")
         minecraftVersion("1.20.4")
     }
     shadowJar {
@@ -66,6 +71,9 @@ tasks {
             include("META-INF/services/**")
             duplicatesStrategy = DuplicatesStrategy.INCLUDE
         }
+    }
+    test{
+        jvmArgs("-Denv=dev")
     }
 }
 

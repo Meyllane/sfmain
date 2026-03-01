@@ -1,58 +1,63 @@
 package io.github.meyllane.sfmain.events;
 
 import io.github.meyllane.sfmain.SFMain;
-import io.github.meyllane.sfmain.application.services.UserService;
-import io.github.meyllane.sfmain.domain.User;
-import io.github.meyllane.sfmain.utils.PluginCommandHelper;
+import io.github.meyllane.sfmain.domain.models.User;
+import io.github.meyllane.sfmain.errors.ErrorMessage;
 import io.github.meyllane.sfmain.utils.PluginMessageHandler;
 import io.github.meyllane.sfmain.utils.PluginMessageType;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import java.util.concurrent.CompletableFuture;
-
 public class PlayerJoinEventListener implements Listener {
-    private final UserService userService;
     private final SFMain plugin;
 
-    public PlayerJoinEventListener(UserService userService, SFMain plugin) {
-        this.userService = userService;
+    public PlayerJoinEventListener(SFMain plugin) {
         this.plugin = plugin;
     }
 
+    //TODO: Handle User update if the name of the minecraftaccount has changed. Just need to update the regi and persit on join
     @EventHandler
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
         //Quickly remove the join message first
         event.joinMessage(null);
         Player player = event.getPlayer();
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
+            Throwable ex = null;
+            User user = null;
 
-            CompletableFuture.supplyAsync(() -> {
-                        return userService.getUser(player.getUniqueId());
-                    })
-                    .thenApply(user -> {
-                        if (user == null) {
-                            user = userService.create(player.getUniqueId(), player.getName());
-                            userService.register(user);
-                        } else {
-                            user.setMinecraftName(player.getName());
-                            userService.update(user);
-                        }
+            try {
+                user = SFMain.userRegistry.get(player.getUniqueId().toString());
 
-                        return user;
-                    })
-                    .whenComplete((user, ex) -> this.handleCompletion(user, ex, player));
+                if (user == null) {
+                    user = SFMain.userEntityRepository.create(new User(
+                            player.getUniqueId().toString(), player.getName()
+                    ));
+                }
+            } catch (Exception e) {
+                ex = e;
+            }
+
+            final Throwable finalEx = ex;
+            final User finalUser = user;
+
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                this.handleCompletion(finalUser, finalEx, player);
+            });
+
         });
     }
 
     public void handleCompletion(User user, Throwable ex, Player player) {
         if (ex != null) {
-            PluginCommandHelper.handleErrors(ex, player);
+            player.sendMessage(PluginMessageHandler.buildPluginMessageComponent(
+                    ErrorMessage.get("general.unexpected_error"),
+                    PluginMessageType.ERROR
+            ));
+            return;
         }
 
         player.sendMessage(PluginMessageHandler.buildPluginMessageComponent(

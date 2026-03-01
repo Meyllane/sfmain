@@ -1,8 +1,8 @@
 package io.github.meyllane.sfmain.persistence.database.entities;
 
-import io.github.meyllane.sfmain.domain.ProfileMastery;
-import io.github.meyllane.sfmain.elements.MasteryElement;
-import io.github.meyllane.sfmain.elements.MasterySpeElement;
+import io.github.meyllane.sfmain.domain.models.ProfileMastery;
+import io.github.meyllane.sfmain.domain.elements.MasteryElement;
+import io.github.meyllane.sfmain.domain.elements.MasterySpeElement;
 import io.github.meyllane.sfmain.persistence.database.converters.MasteryConverter;
 import jakarta.persistence.*;
 

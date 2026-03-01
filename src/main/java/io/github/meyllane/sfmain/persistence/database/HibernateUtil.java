@@ -1,5 +1,6 @@
 package io.github.meyllane.sfmain.persistence.database;
 
+import com.zaxxer.hikari.HikariDataSource;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
@@ -17,34 +18,16 @@ import org.hibernate.cfg.AvailableSettings;
 
 public class HibernateUtil {
 
-    public static SessionFactory buildSessionFactory(String url, String user, String password) {
+    public static SessionFactory buildSessionFactory(HikariDataSource dataSource) {
+        dataSource.setMaximumPoolSize(4);
+        dataSource.setMinimumIdle(1);
+        dataSource.setIdleTimeout(15000);
 
-        Map<String, Object> settings = new HashMap<>();
+        StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
+                .applySetting(AvailableSettings.JAKARTA_JTA_DATASOURCE, dataSource)
+                .applySetting(AvailableSettings.DIALECT, "org.hibernate.dialect.MySQLDialect")
+                .build();
 
-        settings.put(AvailableSettings.JAKARTA_JDBC_DRIVER, "com.mysql.cj.jdbc.Driver");
-        settings.put(AvailableSettings.JAKARTA_JDBC_URL, url);
-        settings.put(AvailableSettings.JAKARTA_JDBC_USER, user);
-        settings.put(AvailableSettings.JAKARTA_JDBC_PASSWORD, password);
-
-        settings.put(
-                AvailableSettings.CONNECTION_PROVIDER,
-                "hikaricp"
-        );
-
-        settings.put("hibernate.hikari.maximumPoolSize", "4");
-        settings.put("hibernate.hikari.minimumIdle", "1");
-        settings.put("hibernate.hikari.idleTimeout", "30000");
-        settings.put("hibernate.hikari.poolName", "SFMainPool");
-
-        settings.put(AvailableSettings.SHOW_SQL, false);
-        settings.put(AvailableSettings.FORMAT_SQL, false);
-
-        settings.put(AvailableSettings.CURRENT_SESSION_CONTEXT_CLASS, "thread");
-
-        StandardServiceRegistry registry =
-                new StandardServiceRegistryBuilder()
-                        .applySettings(settings)
-                        .build();
 
         MetadataSources cfg = new MetadataSources(registry);
 
