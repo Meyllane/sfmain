@@ -39,3 +39,12 @@ CREATE TABLE profile_mastery_specialization(
     FOREIGN KEY (profile_mastery_ID) REFERENCES profile_mastery(ID),
     specialization_ID INT
 );
+
+CREATE TABLE profile_resource_spot_interaction(
+  ID BIGINT PRIMARY KEY AUTO_INCREMENT,
+  profile_ID BIGINT,
+  FOREIGN KEY (profile_ID) REFERENCES profile(ID),
+  resource_spot_ID BIGINT,
+  nb_interaction INT,
+  last_interaction_date DATETIME
+);

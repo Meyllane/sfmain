@@ -30,6 +30,6 @@
         <module name="SFMain.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="17" />
+    <bytecodeTargetLevel target="21" />
   </component>
 </project>

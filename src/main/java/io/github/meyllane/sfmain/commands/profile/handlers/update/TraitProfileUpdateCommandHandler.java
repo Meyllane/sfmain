@@ -4,9 +4,9 @@ import dev.jorel.commandapi.arguments.*;
 import dev.jorel.commandapi.executors.CommandArguments;
 import io.github.meyllane.sfmain.SFMain;
 import io.github.meyllane.sfmain.commands.arguments.TraitArgument;
-import io.github.meyllane.sfmain.commands.core.CommandOperation;
-import io.github.meyllane.sfmain.commands.core.ModelUpdateCommandHandler;
-import io.github.meyllane.sfmain.commands.core.ModelUpdateCommandResult;
+import io.github.meyllane.sfmain.commands.core.models.CommandOperation;
+import io.github.meyllane.sfmain.commands.core.models.ModelUpdateCommandHandler;
+import io.github.meyllane.sfmain.commands.core.models.ModelUpdateCommandResult;
 import io.github.meyllane.sfmain.domain.elements.TraitElement;
 import io.github.meyllane.sfmain.domain.models.Profile;
 import io.github.meyllane.sfmain.domain.models.ProfileTrait;
@@ -17,7 +17,6 @@ import io.github.meyllane.sfmain.utils.PluginMessageType;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 public class TraitProfileUpdateCommandHandler extends ModelUpdateCommandHandler<Profile, ProfileTrait> {

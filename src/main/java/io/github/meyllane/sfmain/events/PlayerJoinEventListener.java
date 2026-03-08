@@ -36,6 +36,7 @@ public class PlayerJoinEventListener implements Listener {
                     user = SFMain.userEntityRepository.create(new User(
                             player.getUniqueId().toString(), player.getName()
                     ));
+                    SFMain.userRegistry.register(user);
                 }
             } catch (Exception e) {
                 ex = e;

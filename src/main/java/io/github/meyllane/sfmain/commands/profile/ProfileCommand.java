@@ -4,8 +4,7 @@ package io.github.meyllane.sfmain.commands.profile;
 import dev.jorel.commandapi.CommandTree;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import io.github.meyllane.sfmain.commands.arguments.ProfileArgument;
-import io.github.meyllane.sfmain.commands.arguments.SpeciesArgument;
-import io.github.meyllane.sfmain.commands.core.ModelUpdateCommandHandler;
+import io.github.meyllane.sfmain.commands.core.models.ModelUpdateCommandHandler;
 import io.github.meyllane.sfmain.commands.profile.handlers.create.ProfileCreateCommandHandler;
 import io.github.meyllane.sfmain.commands.profile.handlers.update.*;
 

@@ -1,11 +1,12 @@
-package io.github.meyllane.sfmain.commands.core;
+package io.github.meyllane.sfmain.commands.core.models;
 
 import dev.jorel.commandapi.executors.CommandArguments;
+import io.github.meyllane.sfmain.commands.core.CommandHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public abstract class ModelCreateCommandHandler<M> extends CommandHandler<M> {
+public abstract class ModelCreateCommandHandler<M> extends CommandHandler {
     public abstract M parse(CommandArguments args);
     public abstract M create(M model);
     public abstract void updateRegistry(M model);

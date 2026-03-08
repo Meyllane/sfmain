@@ -1,6 +1,7 @@
-package io.github.meyllane.sfmain.commands.core;
+package io.github.meyllane.sfmain.commands.core.models;
 
 import dev.jorel.commandapi.executors.CommandArguments;
+import io.github.meyllane.sfmain.commands.core.CommandHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -21,7 +22,7 @@ import java.util.Objects;
  * @param <M> the type of the Model object being updated
  * @param <U> the type of the update value produced by {@link #parse(CommandArguments)} and applied to {@code T}
  */
-public abstract class ModelUpdateCommandHandler<M, U> extends CommandHandler<M> implements OperableCommandHandler{
+public abstract class ModelUpdateCommandHandler<M, U> extends CommandHandler implements OperableCommandHandler{
     public static final String TARGET_NODE = "targetValue";
 
     /**

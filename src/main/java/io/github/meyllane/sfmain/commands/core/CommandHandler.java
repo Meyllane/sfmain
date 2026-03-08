@@ -10,7 +10,7 @@ import io.github.meyllane.sfmain.utils.PluginMessageType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public abstract class CommandHandler<T> {
+public abstract class CommandHandler {
     /**
      * Builds the command branch structure, registering nodes and arguments
      * for this handler in the command tree.

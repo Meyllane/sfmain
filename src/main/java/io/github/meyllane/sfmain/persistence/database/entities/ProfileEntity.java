@@ -1,12 +1,14 @@
 package io.github.meyllane.sfmain.persistence.database.entities;
 
 import io.github.meyllane.sfmain.domain.models.Profile;
+import io.github.meyllane.sfmain.domain.models.ProfileRSInteraction;
 import io.github.meyllane.sfmain.domain.models.ProfileTrait;
 import io.github.meyllane.sfmain.persistence.database.converters.SpeciesConverter;
 import io.github.meyllane.sfmain.domain.elements.SpeciesElement;
 import io.github.meyllane.sfmain.domain.elements.TraitElement;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -36,6 +38,9 @@ public class ProfileEntity {
 
     @OneToOne(mappedBy = ProfileMasteryEntity_.PROFILE, cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private ProfileMasteryEntity profileMastery;
+
+    @OneToMany(mappedBy = ProfileRSInteractionEntity_.PROFILE, cascade = {CascadeType.REMOVE, CascadeType.PERSIST}, orphanRemoval = true)
+    private Set<ProfileRSInteractionEntity> profileRSInteractionEntities = new HashSet<>();
 
     @JoinColumn(name = "user_ID")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -111,6 +116,10 @@ public class ProfileEntity {
         return user;
     }
 
+    public Set<ProfileRSInteractionEntity> getProfileRSInteractionEntities() {
+        return profileRSInteractionEntities;
+    }
+
     @Override
     public boolean equals(Object obj) {
         return obj.getClass() == this.getClass() && ((ProfileEntity) obj).id.equals(id);
@@ -134,6 +143,7 @@ public class ProfileEntity {
         if (profileMastery != null) profileMastery.syncFromDomain(domain.getProfileMastery());
 
         syncProfileTrait(domain);
+        syncProfileRSInteraction(domain);
     }
 
     protected void syncProfileTrait(Profile domain) {
@@ -152,5 +162,23 @@ public class ProfileEntity {
                 this.profileTraitEntities.add(new ProfileTraitEntity(trait.getTrait(), trait.getSpecialization(), this));
             }
         });
+    }
+
+    protected void syncProfileRSInteraction(Profile domain) {
+        Map<Integer, ProfileRSInteractionEntity> profileRS = this.profileRSInteractionEntities.stream()
+                .collect(Collectors.toMap(ProfileRSInteractionEntity::getResourceSpotID, Function.identity()));
+
+        for (ProfileRSInteraction prs : domain.getProfileRSInteractions()) {
+            if (profileRS.containsKey(prs.getResourceSpotID())) {
+                profileRS.get(prs.getResourceSpotID()).syncFromDomain(prs);
+            } else {
+                this.profileRSInteractionEntities.add(new ProfileRSInteractionEntity(
+                        this,
+                        prs.getResourceSpotID(),
+                        0,
+                        LocalDateTime.now()
+                ));
+            }
+        }
     }
 }

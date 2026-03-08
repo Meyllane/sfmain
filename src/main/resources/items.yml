@@ -1,0 +1,27 @@
+items:
+  - ID: 1
+    short_name: item_1
+    name: Item 1
+    description: "Vraiment un très beau objet."
+    material: RABBIT_FOOT
+    texture: card_red
+  - ID: 2
+    short_name: item_2
+    name: Item 2
+    description: "Vraiment un très beau objet."
+    material: RABBIT_FOOT
+    texture: card_blue
+  - ID: 3
+    short_name: item_3
+    name: Item 3
+    description: "Vraiment un très beau objet."
+    material: RABBIT_FOOT
+    texture: card_white
+  - ID: 4
+    short_name: item_4
+    name: Item 4
+    description: "Vraiment un très beau objet."
+    mastery_specialization: 1
+    max_durability: 100
+    material: RABBIT_FOOT
+    texture: card_white

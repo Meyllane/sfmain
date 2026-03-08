@@ -27,6 +27,7 @@ public class ProfileEntityRepository extends EntityRepository<ProfileEntity, Pro
 
         graph.addElementSubgraph(ProfileEntity_.profileTraitEntities);
         graph.addSubgraph(ProfileEntity_.profileMastery).addElementSubgraph(ProfileMasteryEntity_.profileMasterySpeEntities);
+        graph.addElementSubgraph(ProfileEntity_.profileRSInteractionEntities);
 
         return sessionFactory.fromTransaction(session -> {
             return session.createSelectionQuery("FROM ProfileEntity", ProfileEntity.class)
@@ -43,6 +44,7 @@ public class ProfileEntityRepository extends EntityRepository<ProfileEntity, Pro
             graph.addElementSubgraph(ProfileEntity_.profileTraitEntities);
             graph.addSubgraph(ProfileEntity_.profileMastery)
                     .addElementSubgraph(ProfileMasteryEntity_.profileMasterySpeEntities);
+            graph.addElementSubgraph(ProfileEntity_.profileRSInteractionEntities);
 
             ProfileEntity entity = session.find(
                     ProfileEntity.class,

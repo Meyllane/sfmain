@@ -1,21 +1,23 @@
 package io.github.meyllane.sfmain;
 
 import com.zaxxer.hikari.HikariDataSource;
-import io.github.meyllane.sfmain.application.registries.element.MasteryElementRegistry;
-import io.github.meyllane.sfmain.application.registries.element.MasterySpeElementRegistry;
-import io.github.meyllane.sfmain.application.registries.element.SpeciesElementRegistry;
-import io.github.meyllane.sfmain.application.registries.element.TraitElementRegistry;
+import io.github.meyllane.sfmain.application.registries.element.*;
 import io.github.meyllane.sfmain.application.registries.model.ProfileRegistry;
 import io.github.meyllane.sfmain.application.registries.model.UserRegistry;
+import io.github.meyllane.sfmain.commands.custom_item.CustomItemCommand;
 import io.github.meyllane.sfmain.commands.profile.ProfileCommand;
+import io.github.meyllane.sfmain.commands.resource_spot.ResourceSpotCommand;
 import io.github.meyllane.sfmain.commands.user.UserCommand;
+import io.github.meyllane.sfmain.domain.elements.ResourceSpot;
 import io.github.meyllane.sfmain.persistence.database.HibernateUtil;
 import io.github.meyllane.sfmain.events.PlayerJoinEventListener;
 import io.github.meyllane.sfmain.application.loaders.DatabaseLoader;
 import io.github.meyllane.sfmain.persistence.database.FlywayMigrator;
 import io.github.meyllane.sfmain.persistence.database.repositories.ProfileEntityRepository;
 import io.github.meyllane.sfmain.persistence.database.repositories.UserEntityRepository;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.h2.tools.Server;
 import org.hibernate.SessionFactory;
@@ -31,14 +33,19 @@ public final class SFMain extends JavaPlugin {
     private YamlConfiguration traitsConfig;
     private YamlConfiguration speciesConfig;
     private YamlConfiguration masteriesConfig;
+    private YamlConfiguration customItemsConfig;
+    private YamlConfiguration resourceSpotsConfig;
 
     public static DatabaseLoader dbManager;
-    private final String[] configFilesPath = {"database.yml", "traits.yml", "species.yml", "masteries.yml"};
+    private final String[] configFilesPath = {"database.yml", "traits.yml", "species.yml", "masteries.yml", "items.yml",
+            "resource_spots.yml"};
 
     public static final TraitElementRegistry traitsElementRegistry = new TraitElementRegistry();
     public static final SpeciesElementRegistry speciesElementRegistry = new SpeciesElementRegistry();
     public static final MasteryElementRegistry masteriesElementRegistry = new MasteryElementRegistry();
     public static final MasterySpeElementRegistry masterySpeElementRegistry = new MasterySpeElementRegistry();
+    public static final CustomItemRegistry customItemsRegistry = new CustomItemRegistry();
+    public static ResourceSpotRegistry resourceSpotsRegistry;
 
     public static ProfileRegistry profileRegistry;
     public static ProfileEntityRepository profileEntityRepository;
@@ -48,8 +55,14 @@ public final class SFMain extends JavaPlugin {
 
     public static SessionFactory sessionFactory;
 
+    public static NamespacedKey CUSTOM_ITEM_ID_NK;
+    public static NamespacedKey CUSTOM_ITEM_QUALITY_ID_NK;
+    public static NamespacedKey CUSTOM_ITEM_MASTERY_SPE_ID_NK;
+
     @Override
     public void onEnable() {
+        ConfigurationSerialization.registerClass(ResourceSpot.class);
+
         this.saveConfigFiles(configFilesPath);
         this.loadConfigFiles();
 
@@ -60,11 +73,17 @@ public final class SFMain extends JavaPlugin {
         FlywayMigrator.migrate(datasource);
         sessionFactory = HibernateUtil.buildSessionFactory(datasource);
 
+
         //Loading from files
         traitsElementRegistry.load(traitsConfig);
         speciesElementRegistry.load(speciesConfig);
         masteriesElementRegistry.load(masteriesConfig);
         masterySpeElementRegistry.load(masteriesConfig);
+        customItemsRegistry.load(customItemsConfig);
+
+        File resourceSpotsFile = new File(this.getDataFolder(), "resource_spots.yml");
+        resourceSpotsRegistry = new ResourceSpotRegistry(resourceSpotsFile);
+        resourceSpotsRegistry.load(resourceSpotsConfig);
 
         profileEntityRepository = new ProfileEntityRepository(sessionFactory);
         profileRegistry = new ProfileRegistry();
@@ -75,6 +94,12 @@ public final class SFMain extends JavaPlugin {
         userRegistry = new UserRegistry();
         userEntityRepository.getAll().forEach(user -> userRegistry.register(user));
 
+        //NamespacedKey
+
+        CUSTOM_ITEM_ID_NK = new NamespacedKey(this, "custom_item_ID");
+        CUSTOM_ITEM_QUALITY_ID_NK = new NamespacedKey(this, "custom_item_quality_ID");
+        CUSTOM_ITEM_MASTERY_SPE_ID_NK = new NamespacedKey(this, "mastery_spe_ID");
+
         //Register listeners
 
         this.getServer().getPluginManager().registerEvents(new PlayerJoinEventListener(this), this);
@@ -82,6 +107,8 @@ public final class SFMain extends JavaPlugin {
         //Command registration
         UserCommand.register();
         ProfileCommand.register();
+        CustomItemCommand.register();
+        ResourceSpotCommand.register();
     }
 
     @Override
@@ -103,6 +130,8 @@ public final class SFMain extends JavaPlugin {
         traitsConfig = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "traits.yml"));
         speciesConfig = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "species.yml"));
         masteriesConfig = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "masteries.yml"));
+        customItemsConfig = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "items.yml"));
+        resourceSpotsConfig = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "resource_spots.yml"));
     }
 
     private static boolean resolveEnvironment() {

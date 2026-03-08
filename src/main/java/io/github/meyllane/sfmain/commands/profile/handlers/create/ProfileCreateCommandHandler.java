@@ -5,15 +5,13 @@ import dev.jorel.commandapi.arguments.GreedyStringArgument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
 import io.github.meyllane.sfmain.SFMain;
-import io.github.meyllane.sfmain.commands.core.ModelCreateCommandHandler;
+import io.github.meyllane.sfmain.commands.core.models.ModelCreateCommandHandler;
 import io.github.meyllane.sfmain.domain.models.Profile;
 import io.github.meyllane.sfmain.errors.ErrorMessage;
 import io.github.meyllane.sfmain.errors.SFException;
 import io.github.meyllane.sfmain.utils.PluginMessageHandler;
 import io.github.meyllane.sfmain.utils.PluginMessageType;
 import org.bukkit.entity.Player;
-
-import java.awt.*;
 
 public class ProfileCreateCommandHandler extends ModelCreateCommandHandler<Profile> {
     private final String PROFILE_NAME_NODE = "profileName";

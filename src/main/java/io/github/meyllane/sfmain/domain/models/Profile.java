@@ -23,6 +23,7 @@ public class Profile {
     private Set<ProfileTrait> profileTraits = new HashSet<>();
     private ProfileMastery profileMastery;
     private User user;
+    private Set<ProfileRSInteraction> profileRSInteractions = new HashSet<>();
 
     public Profile(Long id, String name, int age, String description, SpeciesElement speciesElement) {
         this.id = id;
@@ -79,6 +80,10 @@ public class Profile {
                 .toList();
     }
 
+    public Set<ProfileRSInteraction> getProfileRSInteractions() {
+        return profileRSInteractions;
+    }
+
     private void setProfileTraits(Set<ProfileTrait> traits) {
         profileTraits = traits;
     }
@@ -101,6 +106,10 @@ public class Profile {
 
     public void setSpeciesElement(SpeciesElement speciesElement) {
         this.speciesElement = speciesElement;
+    }
+
+    public void setProfileRSInteractions(Set<ProfileRSInteraction> profileRSInteractions) {
+        this.profileRSInteractions = profileRSInteractions;
     }
 
     public void setProfileMastery(ProfileMastery profileMastery) {
@@ -158,6 +167,12 @@ public class Profile {
 
         if (entity.getProfileMastery() != null)
             profile.profileMastery = ProfileMastery.fromEntity(entity.getProfileMastery());
+
+        profile.setProfileRSInteractions(entity.getProfileRSInteractionEntities()
+                .stream()
+                .map(ProfileRSInteraction::fromEntity)
+                .collect(Collectors.toSet())
+        );
 
         return profile;
     }
