@@ -175,7 +175,7 @@ public class ProfileEntity {
                 this.profileRSInteractionEntities.add(new ProfileRSInteractionEntity(
                         this,
                         prs.getResourceSpotID(),
-                        0,
+                        prs.getNbInteraction(),
                         LocalDateTime.now()
                 ));
             }

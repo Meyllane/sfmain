@@ -17,12 +17,15 @@ public class ResourceSpotArgument extends CustomArgument<ResourceSpot, String> {
         );
 
         this.replaceSuggestions(ArgumentSuggestions.strings(info -> {
-            return SFMain.resourceSpotsRegistry.getKeys().toArray(String[]::new);
+            return SFMain.resourceSpotsRegistry.getKeys().stream()
+                    .map(key -> '"' + key + '"')
+                    .toArray(String[]::new);
         }));
     }
 
     public static ResourceSpot parse(CustomArgumentInfo<String> info) {
-        ResourceSpot spot = SFMain.resourceSpotsRegistry.get(info.input());
+        String spotName = info.input().replaceAll("\"", "");
+        ResourceSpot spot = SFMain.resourceSpotsRegistry.get(spotName);
 
         if (spot == null) {
             throw new SFException(ErrorMessage.get("resource_spot.unknown_name"));

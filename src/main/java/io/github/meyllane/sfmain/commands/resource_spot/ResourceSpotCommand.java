@@ -14,6 +14,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 
+//TODO: Add a command to copy the parameters of a spot on another loc (just not the name)
 public class ResourceSpotCommand {
     public static void register() {
         new CommandTree("resource_spot")

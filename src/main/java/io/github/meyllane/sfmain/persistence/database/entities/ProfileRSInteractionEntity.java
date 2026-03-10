@@ -4,11 +4,13 @@ import io.github.meyllane.sfmain.domain.models.ProfileRSInteraction;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity()
 @Table(name = "profile_resource_spot_interaction")
 public class ProfileRSInteractionEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     public ProfileRSInteractionEntity() {
@@ -57,5 +59,16 @@ public class ProfileRSInteractionEntity {
     public void syncFromDomain(ProfileRSInteraction domain) {
         this.nbInteraction = domain.getNbInteraction();
         this.lastInteractionDate = domain.getLastInteractionDate();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof ProfileRSInteractionEntity prse
+                && Objects.equals(prse.getId(), this.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.id, this.resourceSpotID);
     }
 }

@@ -77,19 +77,12 @@ public class CustomItemRegistry extends ElementRegistry<CustomItemBase> {
 
         int masterSpeID = (int) base.get("mastery_specialization");
         MasterySpeElement masterySpe = SFMain.masterySpeElementRegistry.get(masterSpeID);
-        Integer durability = (Integer) base.get("max_durability");
 
         if (masterySpe == null) throw new SFException(String.format(
                 ErrorMessage.get("registry.custom_item.unknown_mastery_spe_ID"), item.getId()
         ));
 
-        if (durability == null || durability <= 0) throw new SFException(String.format(
-                ErrorMessage.get("registry.custom_item.no_max_durability"),
-                item.getId()
-        ));
-
         item.setMasterySpeElement(masterySpe);
-        item.setMaxDurability(durability);
 
         return item;
     }

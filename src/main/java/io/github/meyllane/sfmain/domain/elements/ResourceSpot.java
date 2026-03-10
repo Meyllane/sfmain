@@ -1,9 +1,11 @@
 package io.github.meyllane.sfmain.domain.elements;
 
 import io.github.meyllane.sfmain.SFMain;
+import io.github.meyllane.sfmain.domain.models.Profile;
 import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -109,5 +111,21 @@ public class ResourceSpot extends Element implements ConfigurationSerializable {
         }
 
         return spot;
+    }
+
+    public boolean isSetup() {
+        return this.itemBase != null && this.maxInteraction > 0 && this.quality != null;
+    }
+
+    public int getInteractionScore(@Nullable CustomItem customItem, Profile profile) {
+        if (this.masterySpeElement == null) return this.quality.getValue();
+
+        if (!(customItem instanceof CustomTool tool)) return this.quality.getValue();
+
+        if (!tool.getMasterySpeElement().equals(this.masterySpeElement)
+                || !profile.getProfileMastery().getMasterySpecializations().contains(tool.getMasterySpeElement())
+        ) return this.quality.getValue();
+
+        return this.quality.getValue() + tool.quality.getValue() + profile.getProfileMastery().getLevel();
     }
 }

@@ -4,10 +4,10 @@ import io.github.meyllane.sfmain.errors.ErrorMessage;
 import io.github.meyllane.sfmain.errors.SFException;
 
 public enum Quality {
-    BAD(1, "Mauvais", -1, "#965454", 40),
-    NORMAL(2, "Normal", 0, "#65D152", 60),
-    GOOD(3, "Bon", 1, "#52CFD1", 80),
-    EXCELLENT(4, "Excellent", 2, "#C252D1", 100);
+    BAD(1, "Mauvaise", -1, "#965454", 40),
+    NORMAL(2, "Normale", 0, "#65D152", 60),
+    GOOD(3, "Bonne", 1, "#52CFD1", 80),
+    EXCELLENT(4, "Excellente", 2, "#C252D1", 100);
 
     private int ID;
     private String name;

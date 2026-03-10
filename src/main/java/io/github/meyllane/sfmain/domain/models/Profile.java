@@ -112,6 +112,12 @@ public class Profile {
         this.profileRSInteractions = profileRSInteractions;
     }
 
+    public void addProfileRSInteraction(ProfileRSInteraction prs) {
+        if (!this.profileRSInteractions.add(prs)) {
+            throw new IllegalArgumentException(ErrorMessage.get("profile.duplicate_prs"));
+        }
+    }
+
     public void setProfileMastery(ProfileMastery profileMastery) {
         this.profileMastery = profileMastery;
     }

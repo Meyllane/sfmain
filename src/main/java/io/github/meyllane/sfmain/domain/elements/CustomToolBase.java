@@ -48,6 +48,7 @@ public class CustomToolBase extends CustomItemBase {
 
         stack.lore(lore);
 
+        this.maxDurability = quality.getBaseDurability();
         stack.setData(DataComponentTypes.MAX_DAMAGE, maxDurability);
 
         return stack;

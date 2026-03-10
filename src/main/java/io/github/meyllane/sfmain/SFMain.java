@@ -9,6 +9,7 @@ import io.github.meyllane.sfmain.commands.profile.ProfileCommand;
 import io.github.meyllane.sfmain.commands.resource_spot.ResourceSpotCommand;
 import io.github.meyllane.sfmain.commands.user.UserCommand;
 import io.github.meyllane.sfmain.domain.elements.ResourceSpot;
+import io.github.meyllane.sfmain.events.PlayerInteractRSEventListener;
 import io.github.meyllane.sfmain.persistence.database.HibernateUtil;
 import io.github.meyllane.sfmain.events.PlayerJoinEventListener;
 import io.github.meyllane.sfmain.application.loaders.DatabaseLoader;
@@ -81,7 +82,9 @@ public final class SFMain extends JavaPlugin {
         masterySpeElementRegistry.load(masteriesConfig);
         customItemsRegistry.load(customItemsConfig);
 
+
         File resourceSpotsFile = new File(this.getDataFolder(), "resource_spots.yml");
+        resourceSpotsConfig = YamlConfiguration.loadConfiguration(resourceSpotsFile);
         resourceSpotsRegistry = new ResourceSpotRegistry(resourceSpotsFile);
         resourceSpotsRegistry.load(resourceSpotsConfig);
 
@@ -103,6 +106,7 @@ public final class SFMain extends JavaPlugin {
         //Register listeners
 
         this.getServer().getPluginManager().registerEvents(new PlayerJoinEventListener(this), this);
+        this.getServer().getPluginManager().registerEvents(new PlayerInteractRSEventListener(), this);
 
         //Command registration
         UserCommand.register();
@@ -131,7 +135,6 @@ public final class SFMain extends JavaPlugin {
         speciesConfig = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "species.yml"));
         masteriesConfig = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "masteries.yml"));
         customItemsConfig = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "items.yml"));
-        resourceSpotsConfig = YamlConfiguration.loadConfiguration(new File(this.getDataFolder(), "resource_spots.yml"));
     }
 
     private static boolean resolveEnvironment() {
