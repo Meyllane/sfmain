@@ -2,11 +2,16 @@ package io.github.meyllane.sfmain.commands.resource_spot;
 
 import dev.jorel.commandapi.CommandTree;
 import dev.jorel.commandapi.arguments.LiteralArgument;
+import dev.jorel.commandapi.executors.CommandArguments;
 import io.github.meyllane.sfmain.SFMain;
 import io.github.meyllane.sfmain.commands.arguments.ResourceSpotArgument;
 import io.github.meyllane.sfmain.commands.core.data_elements.ResourceSpotUpdateCommandHandler;
+import io.github.meyllane.sfmain.commands.resource_spot.handlers.clone.ResourceSpotCloneCommandHandler;
 import io.github.meyllane.sfmain.commands.resource_spot.handlers.create.ResourceSpotCreateCommandHandler;
+import io.github.meyllane.sfmain.commands.resource_spot.handlers.delete.ResourceSpotDeleteCommandHandler;
+import io.github.meyllane.sfmain.commands.resource_spot.handlers.scan.ResourceSpotScanCommandHandler;
 import io.github.meyllane.sfmain.commands.resource_spot.handlers.update.*;
+import io.github.meyllane.sfmain.commands.resource_spot.handlers.view.ResourceSpotViewCommandHandler;
 import io.github.meyllane.sfmain.errors.ErrorMessage;
 import io.github.meyllane.sfmain.errors.SFException;
 import org.bukkit.Location;
@@ -19,6 +24,10 @@ public class ResourceSpotCommand {
     public static void register() {
         new CommandTree("resource_spot")
                 .then(new ResourceSpotCreateCommandHandler().buildBranch())
+                .then(new ResourceSpotViewCommandHandler().buildBranch())
+                .then(new ResourceSpotCloneCommandHandler().buildBranch())
+                .then(new ResourceSpotDeleteCommandHandler().buildBranch())
+                .then(new ResourceSpotScanCommandHandler().buildBranch())
                 .thenNested(
                         new LiteralArgument("update"),
                         new ResourceSpotArgument(ResourceSpotUpdateCommandHandler.DATA_VALUE_NODE)
@@ -46,52 +55,18 @@ public class ResourceSpotCommand {
 
         return block.getLocation();
     }
-    // /rs create <name>
-    /*
-    Get the name
-    Get the location where the player is looking
-    Check if the location and/or the name is already taken
-    Create
-    Save in .yml
-     */
 
+    public static String parseResourceSpotName(CommandArguments args, String nodeName) {
+        String name = args.getByClassOrDefault(nodeName, String.class, "");
 
-    // /rs update <name> name <newName>
-    // /rs update <name> quality <newQuality>
-    // /rs update <name> location <newLocation< (based on where the player is looking at)
-    // /rs update <name> max_interaction <newInt>
-    // /rs update <name> item <newCustomBaseItem>
-    /*
-    Get the ResourceSpot
-    Apply update
-    save in .yml
-     */
+        if (name.isEmpty()) {
+            throw new SFException(ErrorMessage.get("resource_spot.empty_name"));
+        }
 
-    /*
-    getResourceSpot
-    parse updateValue
-    apply updateValue
-    save
-     */
+        if (SFMain.resourceSpotsRegistry.get(name) != null) {
+            throw new SFException(ErrorMessage.get("resource_spot.duplicate_name"));
+        }
 
-
-    // /rs delete <name>
-    /*
-    Get the ResourceSpot
-    Delete from the registry
-    save in .yml
-     */
-
-    // /rs view <name>
-    /*
-    Get the ResourceSpot
-    Display in chat
-     */
-
-
-    //ResourceSpotArgument
-
-    /*
-    *
-    * */
+        return name;
+    }
 }

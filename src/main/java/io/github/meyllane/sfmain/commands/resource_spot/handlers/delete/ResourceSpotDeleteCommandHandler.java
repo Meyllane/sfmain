@@ -1,66 +1,55 @@
-package io.github.meyllane.sfmain.commands.resource_spot.handlers.create;
+package io.github.meyllane.sfmain.commands.resource_spot.handlers.delete;
 
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
-import dev.jorel.commandapi.arguments.TextArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
 import io.github.meyllane.sfmain.SFMain;
+import io.github.meyllane.sfmain.commands.arguments.ResourceSpotArgument;
 import io.github.meyllane.sfmain.commands.core.CommandHandler;
-import io.github.meyllane.sfmain.commands.resource_spot.ResourceSpotCommand;
 import io.github.meyllane.sfmain.domain.elements.ResourceSpot;
-import io.github.meyllane.sfmain.errors.ErrorMessage;
-import io.github.meyllane.sfmain.errors.SFException;
 import io.github.meyllane.sfmain.utils.PluginMessageHandler;
 import io.github.meyllane.sfmain.utils.PluginMessageType;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class ResourceSpotCreateCommandHandler extends CommandHandler {
+import java.util.Objects;
+
+public class ResourceSpotDeleteCommandHandler extends CommandHandler {
     @Override
     public Argument<String> buildBranch() {
-        return new LiteralArgument("create")
-                .thenNested(
-                        new TextArgument("name")
+        return new LiteralArgument("delete")
+                .then(
+                        new ResourceSpotArgument("resourceSpot")
                                 .executesPlayer(this::execute)
                 );
-    }
-
-    public Location getBlockLocation(Player player) {
-        return ResourceSpotCommand.getLocation(player);
     }
 
     @Override
     public void handleExecution(Player player, CommandArguments args, JavaPlugin plugin) {
         try {
-            Location loc = this.getBlockLocation(player);
-            String name = ResourceSpotCommand.parseResourceSpotName(args, "name");
-            int ID = SFMain.resourceSpotsRegistry.getMaxID() + 1;
-
-            ResourceSpot spot = new ResourceSpot(ID, name, loc);
-
-            SFMain.resourceSpotsRegistry.registerNew(spot);
+            ResourceSpot spot = Objects.requireNonNull(args.getByClass("resourceSpot", ResourceSpot.class));
+            SFMain.resourceSpotsRegistry.delete(spot);
+            SFMain.profileRegistry.removeProfileRSInteraction(spot);
 
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
+                    SFMain.profileEntityRepository.deleteProfileRSInteractions(spot);
                     SFMain.resourceSpotsRegistry.saveConfig();
+                    Bukkit.getScheduler().runTask(plugin, () -> this.handleCompletion(player));
                 } catch (Exception e) {
                     Bukkit.getScheduler().runTask(plugin, () -> this.handleErrors(e, player));
-                    return;
                 }
-
-                Bukkit.getScheduler().runTask(plugin, () -> this.handleCompletion(player, spot));
             });
         } catch (Exception e) {
             this.handleErrors(e, player);
         }
     }
 
-    public void handleCompletion(Player player, ResourceSpot spot) {
+    public void handleCompletion(Player player) {
         player.sendMessage(PluginMessageHandler.buildPluginMessageComponent(
-                "Le point de collecte " + spot.getName() + " a bien été créé !",
+                "Le point de récolte a bien été supprimé.",
                 PluginMessageType.SUCCESS
         ));
     }

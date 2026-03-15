@@ -165,20 +165,25 @@ public class ProfileEntity {
     }
 
     protected void syncProfileRSInteraction(Profile domain) {
-        Map<Integer, ProfileRSInteractionEntity> profileRS = this.profileRSInteractionEntities.stream()
+        Map<Integer, ProfileRSInteraction> domainMap = domain.getProfileRSInteractions().stream()
+                .collect(Collectors.toMap(ProfileRSInteraction::getResourceSpotID, Function.identity()));
+
+        this.profileRSInteractionEntities.removeIf(prs -> domainMap.containsKey(prs.getResourceSpotID()));
+
+        Map<Integer, ProfileRSInteractionEntity> entityMap = this.profileRSInteractionEntities.stream()
                 .collect(Collectors.toMap(ProfileRSInteractionEntity::getResourceSpotID, Function.identity()));
 
-        for (ProfileRSInteraction prs : domain.getProfileRSInteractions()) {
-            if (profileRS.containsKey(prs.getResourceSpotID())) {
-                profileRS.get(prs.getResourceSpotID()).syncFromDomain(prs);
+        domainMap.forEach((id, prs) -> {
+            if (entityMap.containsKey(id)) {
+                entityMap.get(id).syncFromDomain(prs);
             } else {
                 this.profileRSInteractionEntities.add(new ProfileRSInteractionEntity(
                         this,
-                        prs.getResourceSpotID(),
+                        id,
                         prs.getNbInteraction(),
                         LocalDateTime.now()
                 ));
             }
-        }
+        });
     }
 }

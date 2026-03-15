@@ -4,6 +4,7 @@ import io.github.meyllane.sfmain.SFMain;
 import io.github.meyllane.sfmain.application.registries.core.ElementRegistry;
 import io.github.meyllane.sfmain.domain.elements.MasteryElement;
 import io.github.meyllane.sfmain.domain.elements.MasterySpeElement;
+import io.github.meyllane.sfmain.domain.elements.ResourceSpot;
 import io.github.meyllane.sfmain.domain.elements.SpeciesElement;
 import io.github.meyllane.sfmain.errors.ErrorMessage;
 import io.github.meyllane.sfmain.errors.SFException;
@@ -116,6 +117,10 @@ public class Profile {
         if (!this.profileRSInteractions.add(prs)) {
             throw new IllegalArgumentException(ErrorMessage.get("profile.duplicate_prs"));
         }
+    }
+
+    public void removeProfileRSInteraction(ResourceSpot spot) {
+        this.profileRSInteractions.removeIf(prs -> prs.getResourceSpotID() == spot.getId());
     }
 
     public void setProfileMastery(ProfileMastery profileMastery) {

@@ -63,11 +63,7 @@ public class TraitProfileUpdateCommandHandler extends ModelUpdateCommandHandler<
 
     @Override
     public Profile persist(Profile target) {
-        Profile updated = SFMain.profileEntityRepository.update(target);
-
-        SFMain.profileRegistry.delete(updated.getName());
-        SFMain.profileRegistry.register(updated);
-        return updated;
+        return SFMain.profileEntityRepository.update(target);
     }
 
     private String[] processTraitString(String input) {

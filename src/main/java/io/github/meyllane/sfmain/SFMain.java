@@ -1,6 +1,7 @@
 package io.github.meyllane.sfmain;
 
 import com.zaxxer.hikari.HikariDataSource;
+import io.github.meyllane.sfmain.application.managers.ResourceSpotHighlightManager;
 import io.github.meyllane.sfmain.application.registries.element.*;
 import io.github.meyllane.sfmain.application.registries.model.ProfileRegistry;
 import io.github.meyllane.sfmain.application.registries.model.UserRegistry;
@@ -60,6 +61,8 @@ public final class SFMain extends JavaPlugin {
     public static NamespacedKey CUSTOM_ITEM_QUALITY_ID_NK;
     public static NamespacedKey CUSTOM_ITEM_MASTERY_SPE_ID_NK;
 
+    public static ResourceSpotHighlightManager resourceSpotHighlightManager;
+
     @Override
     public void onEnable() {
         ConfigurationSerialization.registerClass(ResourceSpot.class);
@@ -82,7 +85,6 @@ public final class SFMain extends JavaPlugin {
         masterySpeElementRegistry.load(masteriesConfig);
         customItemsRegistry.load(customItemsConfig);
 
-
         File resourceSpotsFile = new File(this.getDataFolder(), "resource_spots.yml");
         resourceSpotsConfig = YamlConfiguration.loadConfiguration(resourceSpotsFile);
         resourceSpotsRegistry = new ResourceSpotRegistry(resourceSpotsFile);
@@ -96,6 +98,8 @@ public final class SFMain extends JavaPlugin {
         userEntityRepository = new UserEntityRepository(sessionFactory);
         userRegistry = new UserRegistry();
         userEntityRepository.getAll().forEach(user -> userRegistry.register(user));
+
+        resourceSpotHighlightManager = new ResourceSpotHighlightManager(this);
 
         //NamespacedKey
 

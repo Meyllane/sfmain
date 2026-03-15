@@ -2,6 +2,7 @@ package io.github.meyllane.sfmain.application.registries.model;
 
 import io.github.meyllane.sfmain.application.registries.core.ModelRegistry;
 import io.github.meyllane.sfmain.application.registries.core.Registry;
+import io.github.meyllane.sfmain.domain.elements.ResourceSpot;
 import io.github.meyllane.sfmain.domain.models.Profile;
 import io.github.meyllane.sfmain.errors.ErrorMessage;
 
@@ -19,5 +20,9 @@ public class ProfileRegistry extends ModelRegistry<Profile> {
         }
 
         this.map.put(elem.getName(), elem);
+    }
+
+    public void removeProfileRSInteraction(ResourceSpot spot) {
+        this.map.values().forEach(profile -> profile.removeProfileRSInteraction(spot));
     }
 }

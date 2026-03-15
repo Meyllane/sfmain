@@ -13,13 +13,16 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 public class ResourceSpotRegistry extends ElementRegistry<ResourceSpot> {
     private final Map<Location, ResourceSpot> byLocation = new ConcurrentHashMap<>();
     private YamlConfiguration config;
     private final File configFile;
+    private int maxID;
 
     public ResourceSpotRegistry(File configFile) {
         this.configFile = configFile;
@@ -40,6 +43,9 @@ public class ResourceSpotRegistry extends ElementRegistry<ResourceSpot> {
 
     public void registerNew(ResourceSpot spot) {
         this.register(spot);
+        this.maxID++;
+
+        config.set("max_ID", maxID);
         config.set("resource_spots." + spot.getName(), spot);
     }
 
@@ -50,6 +56,8 @@ public class ResourceSpotRegistry extends ElementRegistry<ResourceSpot> {
     @Override
     public void load(YamlConfiguration config) {
         this.config = config;
+
+        this.maxID = config.getInt("max_ID");
 
         ConfigurationSection section = config.getConfigurationSection("resource_spots");
 
@@ -68,16 +76,24 @@ public class ResourceSpotRegistry extends ElementRegistry<ResourceSpot> {
     }
 
     public int getMaxID() {
-        return this.byId.values().stream()
-                .map(ResourceSpot::getId)
-                .max(Comparator.naturalOrder())
-                .stream().findFirst()
-                .orElse(0);
+        return this.maxID;
     }
 
     public void remove(ResourceSpot elem) {
         this.byName.remove(elem.getName());
         this.byId.remove(elem.getId());
         this.byLocation.remove(elem.getLocation());
+    }
+
+    public void delete(ResourceSpot elem) {
+        this.remove(elem);
+
+        this.config.set("resource_spots." + elem.getName(), null);
+    }
+
+    public Set<ResourceSpot> getSpotsInRange(Location loc, int range) {
+        return this.getValues().stream()
+                .filter(spot -> spot.getLocation().distance(loc) <= range)
+                .collect(Collectors.toSet());
     }
 }
